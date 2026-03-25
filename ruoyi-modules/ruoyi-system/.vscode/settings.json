@@ -1,0 +1,14 @@
+{
+  "java.configuration.runtimes": [
+    {
+      "name": "JavaSE-23",
+      "default": true,
+      "vmargs": "-XX:+UseStringDeduplication"
+    }
+  ],
+  "java.jdt.ls.java.home": "/opt/homebrew/Cellar/openjdk/23.0.2/libexec/openjdk.jdk/Contents/Home",
+  "java.debug.settings.enableRunDebugCodeLens": true,
+  "java.run.debug": true,
+  "java.format.enabled": true,
+  "java.saveActions.organizeImports": true
+}

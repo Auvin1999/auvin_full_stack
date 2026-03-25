@@ -1,0 +1,55 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "RuoYiSystemApplication",
+      "request": "launch",
+      "mainClass": "com.ruoyi.RuoYiSystemApplication",
+      "projectName": "ruoyi-modules-system",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env",
+      "vmArgs": "-Dspring.profiles.active=dev -Dserver.port=9201",
+      "env": {
+        "JAVA_HOME": "/opt/homebrew/Cellar/openjdk/23.0.2/libexec/openjdk.jdk/Contents/Home"
+      },
+      "classPaths": [],
+      "modulePaths": [],
+      "sourcePaths": [
+        "${workspaceFolder}/src/main/java"
+      ],
+      "outputPaths": [
+        "${workspaceFolder}/target/classes"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "stopOnEntry": false
+    },
+    {
+      "type": "java",
+      "name": "RuoYiSystemApplication (Debug)",
+      "request": "launch",
+      "mainClass": "com.ruoyi.RuoYiSystemApplication",
+      "projectName": "ruoyi-modules-system",
+      "vmArgs": "-Dspring.profiles.active=dev -Dserver.port=9201 -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=*:5005",
+      "env": {
+        "JAVA_HOME": "/opt/homebrew/Cellar/openjdk/23.0.2/libexec/openjdk.jdk/Contents/Home"
+      },
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "java",
+      "name": "Spring Boot-RuoYiSystemApplication<ruoyi-modules-system>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.ruoyi.system.RuoYiSystemApplication",
+      "projectName": "ruoyi-modules-system",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
