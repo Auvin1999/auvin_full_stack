@@ -4,7 +4,7 @@
 # 用于快速启动所有后端服务和前端
 
 # 解析命令行参数
-FRONTEND_VERSION="vue2"  # 默认使用 Vue3
+FRONTEND_VERSION="vue2"  # 默认使用 Vue2
 
 while [[ $# -gt 0 ]]; do
     case $1 in
