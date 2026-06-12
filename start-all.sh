@@ -29,7 +29,7 @@ done
 echo "将启动 ${FRONTEND_VERSION} 版本前端"
 
 # 设置项目根目录
-PROJECT_DIR="/Users/cheang/Downloads/auvin/work/maintain/admin/auvin_learn_full_stack"
+PROJECT_DIR="/Users/cheang/Downloads/auvin/work/maintain/admin/dst-maintain-meta/auvin_learn_full_stack"
 cd "$PROJECT_DIR" || exit 1
 
 # 设置 Java Home (根据你的环境修改)

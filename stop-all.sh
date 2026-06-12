@@ -4,7 +4,7 @@
 # 用于停止所有后端服务和前端
 
 # 设置项目根目录
-PROJECT_DIR="/Users/cheang/Downloads/auvin/work/maintain/admin/auvin_learn_full_stack"
+PROJECT_DIR="/Users/cheang/Downloads/auvin/work/maintain/admin/dst-maintain-meta/auvin_learn_full_stack"
 cd "$PROJECT_DIR" || exit 1
 
 # 颜色输出
