@@ -9,12 +9,37 @@ import {
   ArrowRightOutlined,
   MinusCircleOutlined,
 } from '@ant-design/icons'
+import i18n from '@/i18n'
 import { useTagsViewStore, type TagView } from '@/store/useTagsViewStore'
+import { useSettingsStore } from '@/store/useSettingsStore'
+
+// 后端菜单中文标题 → i18n key（与 Sidebar 保持一致）
+const titleI18nMap: Record<string, string> = {
+  '系统管理': 'menu.system', '系统监控': 'menu.monitor', '系统工具': 'menu.tool',
+  '用户管理': 'menu.user', '角色管理': 'menu.role', '菜单管理': 'menu.menu',
+  '部门管理': 'menu.dept', '字典管理': 'menu.dict', '字典数据': 'menu.dictData',
+  '参数设置': 'menu.config', '参数管理': 'menu.config', '通知公告': 'menu.notice',
+  '岗位管理': 'menu.post', '操作日志': 'menu.operlog', '登录日志': 'menu.logininfor',
+  '定时任务': 'menu.job', '调度日志': 'menu.jobLog', '在线用户': 'menu.online',
+  '代码生成': 'menu.gen', '表单构建': 'menu.build', '个人中心': 'menu.profile',
+  '首页': 'navbar.home', '服务监控': 'menu.monitor', '若依官网': 'menu.ruoyiHome',
+}
+
+function translateTitle(title?: string): string {
+  if (!title) return ''
+  const key = titleI18nMap[title]
+  if (key) {
+    const translated = i18n.t(key)
+    return translated !== key ? translated : title
+  }
+  return title
+}
 
 export default function TagsView() {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
+  const language = useSettingsStore((s) => s.language)
   const containerRef = useRef<HTMLDivElement>(null)
   const {
     visitedViews,
@@ -30,10 +55,10 @@ export default function TagsView() {
     visible: false, x: 0, y: 0, view: null,
   })
 
-  // 初始化首页标签（affix）
+  // 初始化首页标签（affix），语言切换时更新
   useEffect(() => {
     addView({ path: '/', title: t('navbar.home'), meta: { title: t('navbar.home'), icon: 'dashboard', affix: true } })
-  }, [])
+  }, [language])
 
   // 路由变化时添加标签
   useEffect(() => {
@@ -167,7 +192,7 @@ export default function TagsView() {
               }
             }}
           >
-            {view.meta?.title || view.title || 'no-name'}
+            {translateTitle(view.meta?.title) || view.title || 'no-name'}
             {!view.meta?.affix && (
               <CloseOutlined
                 className="tag-close-icon"
