@@ -24,6 +24,7 @@ import {
 } from '@ant-design/icons'
 import { usePermissionStore, type AppRouteObject } from '@/store/usePermissionStore'
 import { useAppStore } from '@/store/useAppStore'
+import { isExternal } from '@/utils/validate'
 import Logo from './Logo'
 
 // 图标映射表
@@ -58,6 +59,21 @@ function getIcon(icon?: string): React.ReactNode {
 
 type MenuItem = Required<MenuProps>['items'][number]
 
+/**
+ * 判断是否为外部链接（http/https 开头）
+ */
+function isExternalLink(path?: string): boolean {
+  return !!path && isExternal(path)
+}
+
+/**
+ * 构造菜单项
+ *
+ * 关键逻辑：
+ * - 路由的 meta.link 存在且为外链 → key 使用外链地址，点击新标签打开
+ * - 路由的 component 为 InnerLink → key 使用 meta.link，点击在 iframe 中嵌入
+ * - 其他 → key 使用路由路径，点击走 React Router
+ */
 function buildMenuItems(routes: AppRouteObject[], parentPath = ''): MenuItem[] {
   const items: MenuItem[] = []
 
@@ -68,33 +84,44 @@ function buildMenuItems(routes: AppRouteObject[], parentPath = ''): MenuItem[] {
       ? route.path
       : parentPath + '/' + (route.path || '')
 
+    // 判断链接目标：优先使用 meta.link
+    const linkTarget = route.meta?.link
+    const isExt = isExternalLink(linkTarget)
+
     if (route.children && route.children.length > 0) {
-      // 有子路由的菜单项
       const visibleChildren = route.children.filter((c) => !c.hidden)
 
       if (visibleChildren.length === 1) {
-        // 只有一个可见子路由时，直接显示子路由
         const child = visibleChildren[0]
         const childPath = child.path?.startsWith('/')
           ? child.path
           : fullPath + '/' + (child.path || '')
 
+        const childLink = child.meta?.link
+        const childIsExt = isExternalLink(childLink)
+
+        // 单个子路由：使用子路由的 key
+        const menuKey = childIsExt ? `@ext:${childLink}` : childPath
+
         items.push({
-          key: childPath,
+          key: menuKey,
           icon: getIcon(child.meta?.icon || route.meta?.icon),
           label: child.meta?.title || route.meta?.title,
         })
       } else if (visibleChildren.length > 1) {
+        // 多个子路由：递归构造
         items.push({
-          key: fullPath,
+          key: isExt ? `@ext:${linkTarget}` : fullPath,
           icon: getIcon(route.meta?.icon),
           label: route.meta?.title,
           children: buildMenuItems(route.children, fullPath),
         })
       }
     } else {
+      // 叶子节点
+      const menuKey = isExt ? `@ext:${linkTarget}` : fullPath
       items.push({
-        key: fullPath,
+        key: menuKey,
         icon: getIcon(route.meta?.icon),
         label: route.meta?.title,
       })
@@ -126,6 +153,15 @@ export default function Sidebar() {
     return keys
   }, [location.pathname])
 
+  const handleMenuClick = ({ key }: { key: string }) => {
+    if (key.startsWith('@ext:')) {
+      // 外部链接：新标签打开
+      window.open(key.replace('@ext:', ''), '_blank', 'noopener')
+    } else {
+      navigate(key)
+    }
+  }
+
   if (sidebar.hide) return null
 
   return (
@@ -137,7 +173,7 @@ export default function Sidebar() {
         selectedKeys={selectedKeys}
         defaultOpenKeys={openKeys}
         items={menuItems}
-        onClick={({ key }) => navigate(key)}
+        onClick={handleMenuClick}
         style={{ borderRight: 0, height: 'calc(100vh - 50px)', overflow: 'auto' }}
       />
     </div>
