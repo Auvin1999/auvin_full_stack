@@ -80,18 +80,16 @@ export const useUserStore = create<UserState & UserActions>((set) => ({
     const { getInfo } = await import('@/api/login')
     const res = await getInfo()
     const data = res as any
-    // 兼容不同后端返回格式
-    const user = data.user || data.data?.user || data
-    const roles = (data.roles || data.data?.roles || []).length > 0
-      ? (data.roles || data.data?.roles)
-      : ['ROLE_DEFAULT']
-    const permissions = data.permissions || data.data?.permissions || []
+    // 兼容响应结构：user 在 data 字段，roles/permissions 在顶层
+    const user = data.user || data.data || data
+    const roles = (data.roles || []).length > 0 ? data.roles : ['ROLE_DEFAULT']
+    const permissions = data.permissions || []
 
     set({
       id: user.userId || user.id,
       name: user.userName || user.username,
       nickName: user.nickName,
-      avatar: user.avatar,
+      avatar: user.avatar || '',
       roles,
       permissions,
     })

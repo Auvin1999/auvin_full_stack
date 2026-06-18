@@ -106,6 +106,7 @@ export default {
     post: '岗位管理',
     operlog: '操作日志',
     logininfor: '登录日志',
+    logManage: '日志管理',
     job: '定时任务',
     jobLog: '调度日志',
     online: '在线用户',
@@ -113,6 +114,7 @@ export default {
     build: '表单构建',
     profile: '个人中心',
     ruoyiHome: '若依官网',
+    apiDoc: '系统接口',
   },
 
   // 首页

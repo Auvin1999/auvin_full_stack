@@ -26,7 +26,7 @@ const titleI18nMap: Record<string, string> = {
 }
 
 function translateTitle(title?: string): string {
-  if (!title) return ''
+  if (!title) return '未知页面'
   const key = titleI18nMap[title]
   if (key) {
     const translated = i18n.t(key)

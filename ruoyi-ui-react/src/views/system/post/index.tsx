@@ -73,8 +73,8 @@ export default function PostIndex() {
 
   return (
     <div className="app-container">
-      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
-        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+      <Card style={{ marginBottom: 16 }}>
+        {showSearch && (
           <Form form={queryForm} onFinish={handleQuery}>
             <Row gutter={16}>
               <Col span={8}><Form.Item name="postCode" label={t('postMgmt.postCode')}><Input placeholder={t('postMgmt.postCode')} allowClear /></Form.Item></Col>
@@ -89,8 +89,8 @@ export default function PostIndex() {
               <Col span={24}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
             </Row>
           </Form>
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: showSearch ? '1px solid #f0f0f0' : 'none', paddingTop: showSearch ? 12 : 0 }}>
           <Space>
             <HasPermi permissions={['system:post:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
             <HasPermi permissions={['system:post:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>

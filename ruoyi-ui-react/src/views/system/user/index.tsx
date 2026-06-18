@@ -252,7 +252,8 @@ export default function UserIndex() {
     <div className="app-container">
       {/* 搜索 + 操作栏 */}
       <Card style={{ marginBottom: 16 }}>
-        <Form form={queryForm} onFinish={handleQuery}>
+        {showSearch && (
+          <Form form={queryForm} onFinish={handleQuery}>
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item name="userName" label={t('user.userName')}>
@@ -300,6 +301,7 @@ export default function UserIndex() {
             </Col>
           </Row>
         </Form>
+        )}
         {/* 操作按钮行 */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>

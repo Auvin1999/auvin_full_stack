@@ -46,6 +46,7 @@ const titleI18nMap: Record<string, string> = {
   '岗位管理': 'menu.post',
   '操作日志': 'menu.operlog',
   '登录日志': 'menu.logininfor',
+  '日志管理': 'menu.logManage',
   '定时任务': 'menu.job',
   '调度日志': 'menu.jobLog',
   '在线用户': 'menu.online',
@@ -55,15 +56,15 @@ const titleI18nMap: Record<string, string> = {
   '首页': 'navbar.home',
   '服务监控': 'menu.monitor',
   '若依官网': 'menu.ruoyiHome',
+  '系统接口': 'menu.apiDoc',
 }
 
 /** 将后端标题翻译为当前语言 */
 function translateTitle(title?: string): string {
-  if (!title) return ''
+  if (!title) return '未知菜单'
   const key = titleI18nMap[title]
   if (key) {
     const translated = i18n.t(key)
-    // i18n.t() 在找不到 key 时返回 key 本身，此时回退到原中文
     return translated !== key ? translated : title
   }
   return title
@@ -95,7 +96,7 @@ const iconMap: Record<string, React.ReactNode> = {
 }
 
 function getIcon(icon?: string): React.ReactNode {
-  if (!icon) return undefined
+  if (!icon) return <SettingOutlined />
   return iconMap[icon] || <SettingOutlined />
 }
 

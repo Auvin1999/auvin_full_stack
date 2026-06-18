@@ -3,6 +3,7 @@ import { Table, Button, Form, Input, Space, Card, message, Row, Col } from 'antd
 import { SearchOutlined, ReloadOutlined, LogoutOutlined } from '@ant-design/icons'
 import { list, forceLogout } from '@/api/monitor/online'
 import Pagination from '@/components/Pagination'
+import RightToolbar from '@/components/RightToolbar'
 import { parseTime } from '@/utils/ruoyi'
 import { useTranslation } from 'react-i18next'
 import { confirmAction } from '@/utils/confirm'
@@ -12,6 +13,7 @@ export default function OnlineIndex() {
   const [queryForm] = Form.useForm()
   const [allData, setAllData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [showSearch, setShowSearch] = useState(true)
   const [queryParams, setQueryParams] = useState<any>({ pageNum: 1, pageSize: 10 })
   const [filter, setFilter] = useState<any>({})
 
@@ -50,13 +52,19 @@ export default function OnlineIndex() {
   return (
     <div className="app-container">
       <Card style={{ marginBottom: 16 }}>
-        <Form form={queryForm} onFinish={handleQuery}>
-          <Row gutter={16}>
-            <Col span={8}><Form.Item name="ipaddr" label={t('online.host')}><Input placeholder={t('online.host')} allowClear /></Form.Item></Col>
-            <Col span={8}><Form.Item name="userName" label={t('online.loginName')}><Input placeholder={t('online.loginName')} allowClear /></Form.Item></Col>
-            <Col span={8}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
-          </Row>
-        </Form>
+        {showSearch && (
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="ipaddr" label={t('online.host')}><Input placeholder={t('online.host')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="userName" label={t('online.loginName')}><Input placeholder={t('online.loginName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
+          </Form>
+        )}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: showSearch ? '1px solid #f0f0f0' : 'none', paddingTop: showSearch ? 12 : 0 }}>
+          <Space />
+          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
+        </div>
       </Card>
       <Card>
         <Table rowKey="tokenId" columns={columns} dataSource={pageData} loading={loading} pagination={false} scroll={{ x: 800 }} />

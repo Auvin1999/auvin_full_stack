@@ -106,6 +106,7 @@ export default {
     post: 'Post',
     operlog: 'Operation Log',
     logininfor: 'Login Log',
+    logManage: 'Log Management',
     job: 'Job',
     jobLog: 'Job Log',
     online: 'Online Users',
@@ -113,6 +114,7 @@ export default {
     build: 'Form Builder',
     profile: 'Profile',
     ruoyiHome: 'RuoYi Website',
+    apiDoc: 'API Documentation',
   },
 
   // Dashboard

@@ -4,10 +4,14 @@
 # 用于快速启动所有后端服务和前端
 
 # 解析命令行参数
-FRONTEND_VERSION="vue2"  # 默认使用 Vue2
+FRONTEND_VERSION="react"  # 默认使用 React
 
 while [[ $# -gt 0 ]]; do
     case $1 in
+        --react)
+            FRONTEND_VERSION="react"
+            shift
+            ;;
         --vue2)
             FRONTEND_VERSION="vue2"
             shift
@@ -18,9 +22,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         *)
             echo "未知参数: $1"
-            echo "用法: $0 [--vue2|--vue3]"
-            echo "  --vue2  启动 Vue2 版本前端 (默认)"
-            echo "  --vue3  启动 Vue3 版本前端"
+            echo "用法: $0 [--react|--vue2|--vue3]"
+            echo "  --react  启动 React 版本前端 (默认)"
+            echo "  --vue2   启动 Vue2 版本前端"
+            echo "  --vue3   启动 Vue3 版本前端"
             exit 1
             ;;
     esac
@@ -160,23 +165,30 @@ start_backend_service "File" "ruoyi-modules/ruoyi-file" 9300
 # ==================== 启动前端 ====================
 log_info "=== 启动前端 ==="
 
-# 设置前端目录
+# 设置前端目录和端口
 FRONTEND_DIR=""
 FRONTEND_LOG="frontend.log"
 FRONTEND_PID="frontend.pid"
+FRONTEND_PORT=1025
 
-if [[ "$FRONTEND_VERSION" == "vue2" ]]; then
+if [[ "$FRONTEND_VERSION" == "react" ]]; then
+    FRONTEND_DIR="ruoyi-ui-react"
+    FRONTEND_PORT=1025
+    log_info "启动 React 版本前端..."
+elif [[ "$FRONTEND_VERSION" == "vue2" ]]; then
     FRONTEND_DIR="ruoyi-ui-vue2"
+    FRONTEND_PORT=1024
     log_info "启动 Vue2 版本前端..."
 elif [[ "$FRONTEND_VERSION" == "vue3" ]]; then
     FRONTEND_DIR="ruoyi-ui-vue3"
+    FRONTEND_PORT=1024
     FRONTEND_LOG="frontend-vue3.log"
     FRONTEND_PID="frontend-vue3.pid"
     log_info "启动 Vue3 版本前端..."
 fi
 
-if check_service 1024 "前端"; then
-    log_warn "前端已在运行，跳过启动"
+if check_service $FRONTEND_PORT "前端"; then
+    log_warn "前端已在运行 (端口 $FRONTEND_PORT)，跳过启动"
 else
     log_info "正在启动前端..."
     cd "$PROJECT_DIR/$FRONTEND_DIR" || exit 1
@@ -191,7 +203,7 @@ else
     nohup npm run dev > "$PROJECT_DIR/logs/$FRONTEND_LOG" 2>&1 &
     echo $! > "$PROJECT_DIR/logs/$FRONTEND_PID"
 
-    wait_for_service 1024 "前端"
+    wait_for_service $FRONTEND_PORT "前端"
 fi
 
 # ==================== 启动完成 ====================
@@ -201,7 +213,7 @@ echo ""
 echo "============================================"
 echo "  服务访问地址"
 echo "============================================"
-echo "  前端地址:    http://localhost:1024 (${FRONTEND_VERSION}版本)"
+echo "  前端地址:    http://localhost:${FRONTEND_PORT} (${FRONTEND_VERSION}版本)"
 echo "  Nacos:       http://localhost:8848/nacos (nacos/nacos)"
 echo "  Gateway:     http://localhost:8080"
 echo "  Auth:        http://localhost:9200"

@@ -53,7 +53,7 @@ export default function Index() {
     <div style={{ maxWidth: 1400, margin: '0 auto' }}>
       {/* 欢迎横幅 */}
       <Card
-        bordered={false}
+        variant="borderless"
         style={{
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           color: '#fff',
@@ -94,7 +94,7 @@ export default function Index() {
       <Row gutter={16} style={{ marginBottom: 20 }}>
         {stats.map((s) => (
           <Col span={6} key={s.label}>
-            <Card bordered={false} styles={{ body: { display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px' } }}>
+            <Card variant="borderless" styles={{ body: { display: 'flex', alignItems: 'center', gap: 16, padding: '16px 20px' } }}>
               <Avatar size={48} style={{ background: s.color }} icon={s.icon} />
               <div>
                 <div style={{ fontSize: 28, fontWeight: 700, lineHeight: 1.2 }}>{s.count}</div>
@@ -106,7 +106,7 @@ export default function Index() {
       </Row>
 
       {/* 功能模块导航 */}
-      <Card bordered={false} style={{ marginBottom: 20 }}>
+      <Card variant="borderless" style={{ marginBottom: 20 }}>
         <Title level={5} style={{ marginBottom: 16 }}>
           <RocketOutlined style={{ marginRight: 8 }} />
           {t('dashboard.features')}
@@ -116,7 +116,7 @@ export default function Index() {
             <Col xs={12} sm={8} md={6} lg={4} key={mod.path}>
               <Card
                 hoverable
-                bordered={false}
+                variant="borderless"
                 style={{ textAlign: 'center', borderRadius: 8, cursor: 'pointer' }}
                 styles={{ body: { padding: '20px 12px' } }}
                 onClick={() => navigate(mod.path)}
@@ -141,7 +141,7 @@ export default function Index() {
       {/* 底部信息 */}
       <Row gutter={16}>
         <Col span={8}>
-          <Card bordered={false} style={{ textAlign: 'center' }}>
+          <Card variant="borderless" style={{ textAlign: 'center' }}>
             <GlobalOutlined style={{ fontSize: 32, color: '#1890ff', marginBottom: 8 }} />
             <div style={{ fontWeight: 600 }}>{t('dashboard.website')}</div>
             <a href="http://ruoyi.vip" target="_blank" rel="noreferrer" style={{ color: '#1890ff' }}>
@@ -150,14 +150,14 @@ export default function Index() {
           </Card>
         </Col>
         <Col span={8}>
-          <Card bordered={false} style={{ textAlign: 'center' }}>
+          <Card variant="borderless" style={{ textAlign: 'center' }}>
             <TeamOutlined style={{ fontSize: 32, color: '#52c41a', marginBottom: 8 }} />
             <div style={{ fontWeight: 600 }}>{t('dashboard.techExchange')}</div>
             <div style={{ color: '#999' }}>QQ: 891137268</div>
           </Card>
         </Col>
         <Col span={8}>
-          <Card bordered={false} style={{ textAlign: 'center' }}>
+          <Card variant="borderless" style={{ textAlign: 'center' }}>
             <RocketOutlined style={{ fontSize: 32, color: '#722ed1', marginBottom: 8 }} />
             <div style={{ fontWeight: 600 }}>{t('dashboard.repo')}</div>
             <a href="https://github.com/yangzongzhuan/RuoYi-Vue3" target="_blank" rel="noreferrer" style={{ color: '#722ed1' }}>
