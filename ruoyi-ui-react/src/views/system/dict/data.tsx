@@ -9,8 +9,10 @@ import { HasPermi } from '@/components/Permission'
 import Pagination from '@/components/Pagination'
 import DictTag from '@/components/DictTag'
 import { useDict } from '@/utils/dict'
+import { useTranslation } from 'react-i18next'
 
 export default function DictDataIndex() {
+  const { t } = useTranslation()
   const { dictId } = useParams()
   const navigate = useNavigate()
   const [form] = Form.useForm()
@@ -47,17 +49,17 @@ export default function DictDataIndex() {
   useEffect(() => { getList() }, [getList])
 
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
-  const handleAdd = () => { form.resetFields(); form.setFieldsValue({ dictType }); setTitle('添加字典数据'); setOpen(true) }
+  const handleAdd = () => { form.resetFields(); form.setFieldsValue({ dictType }); setTitle(t('dictMgmt.addData')); setOpen(true) }
   const handleUpdate = async (row: any) => {
     form.resetFields()
     const res: any = await request({ url: '/system/dict/data/' + row.dictCode, method: 'get' })
-    form.setFieldsValue(res.data || res); setTitle('修改字典数据'); setOpen(true)
+    form.setFieldsValue(res.data || res); setTitle(t('dictMgmt.editData')); setOpen(true)
   }
   const handleDelete = async (row?: any) => {
     const ids = row ? [row.dictCode] : selectedRowKeys
-    if (!ids.length) { message.warning('请选择要删除的数据'); return }
+    if (!ids.length) { message.warning(t('pleaseSelectData')); return }
     await request({ url: '/system/dict/data/' + ids.join(','), method: 'delete' })
-    message.success('删除成功'); getList()
+    message.success(t('deleteSuccess')); getList()
   }
   const handleSubmit = async () => {
     try {
@@ -67,23 +69,23 @@ export default function DictDataIndex() {
       } else {
         await request({ url: '/system/dict/data', method: 'post', data: values })
       }
-      message.success(values.dictCode ? '修改成功' : '新增成功'); setOpen(false); getList()
+      message.success(values.dictCode ? t('editSuccess') : t('addSuccess')); setOpen(false); getList()
     } finally { setSubmitting(false) }
   }
 
   const columns = [
-    { title: '字典编码', dataIndex: 'dictCode', width: 100 },
-    { title: '字典标签', dataIndex: 'dictLabel', width: 150 },
-    { title: '字典键值', dataIndex: 'dictValue', width: 120 },
-    { title: '字典排序', dataIndex: 'dictSort', width: 100 },
-    { title: '状态', dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_normal_disable || []} value={v} /> },
-    { title: '备注', dataIndex: 'remark', width: 150, ellipsis: true },
+    { title: t('dictMgmt.dictCode'), dataIndex: 'dictCode', width: 100 },
+    { title: t('dictMgmt.dictLabel'), dataIndex: 'dictLabel', width: 150 },
+    { title: t('dictMgmt.dictValue'), dataIndex: 'dictValue', width: 120 },
+    { title: t('dictMgmt.dictSort'), dataIndex: 'dictSort', width: 100 },
+    { title: t('status'), dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_normal_disable || []} value={v} /> },
+    { title: t('remark'), dataIndex: 'remark', width: 150, ellipsis: true },
     {
-      title: '操作', width: 180, fixed: 'right' as const,
+      title: t('operation'), width: 180, fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="small">
-          <HasPermi permissions={['system:dict:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>修改</Button></HasPermi>
-          <HasPermi permissions={['system:dict:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['system:dict:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
+          <HasPermi permissions={['system:dict:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
         </Space>
       )
     }
@@ -93,11 +95,11 @@ export default function DictDataIndex() {
     <div className="app-container">
       <Card>
         <div style={{ display: 'flex', marginBottom: 16, alignItems: 'center', gap: 16 }}>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/system/dict')}>返回</Button>
-          <span style={{ fontWeight: 600 }}>字典类型：{dictType}</span>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/system/dict')}>{t('back')}</Button>
+          <span style={{ fontWeight: 600 }}>{t('dictMgmt.dictType')}：{dictType}</span>
           <Space style={{ marginLeft: 'auto' }}>
-            <HasPermi permissions={['system:dict:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增</Button></HasPermi>
-            <HasPermi permissions={['system:dict:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>删除</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['system:dict:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
+            <HasPermi permissions={['system:dict:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
           </Space>
         </div>
         <Table rowKey="dictCode" columns={columns} dataSource={dataList} loading={loading} pagination={false} scroll={{ x: 800 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
@@ -107,11 +109,11 @@ export default function DictDataIndex() {
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="dictCode" hidden><Input /></Form.Item>
           <Form.Item name="dictType" hidden><Input /></Form.Item>
-          <Form.Item name="dictLabel" label="字典标签" rules={[{ required: true, message: '请输入字典标签' }]}><Input placeholder="请输入字典标签" /></Form.Item>
-          <Form.Item name="dictValue" label="字典键值" rules={[{ required: true, message: '请输入字典键值' }]}><Input placeholder="请输入字典键值" /></Form.Item>
-          <Form.Item name="dictSort" label="字典排序" rules={[{ required: true, message: '请输入排序' }]}><Input type="number" placeholder="请输入排序" /></Form.Item>
-          <Form.Item name="status" label="状态" initialValue="0"><Radio.Group>{(dict.sys_normal_disable || []).map((i: any) => <Radio key={i.value} value={i.value}>{i.label}</Radio>)}</Radio.Group></Form.Item>
-          <Form.Item name="remark" label="备注"><Input.TextArea rows={3} placeholder="请输入备注" /></Form.Item>
+          <Form.Item name="dictLabel" label={t('dictMgmt.dictLabel')} rules={[{ required: true, message: t('dictMgmt.dictLabel') }]}><Input placeholder={t('dictMgmt.dictLabel')} /></Form.Item>
+          <Form.Item name="dictValue" label={t('dictMgmt.dictValue')} rules={[{ required: true, message: t('dictMgmt.dictValue') }]}><Input placeholder={t('dictMgmt.dictValue')} /></Form.Item>
+          <Form.Item name="dictSort" label={t('dictMgmt.dictSort')} rules={[{ required: true, message: t('dictMgmt.dictSort') }]}><Input type="number" placeholder={t('dictMgmt.dictSort')} /></Form.Item>
+          <Form.Item name="status" label={t('status')} initialValue="0"><Radio.Group>{(dict.sys_normal_disable || []).map((i: any) => <Radio key={i.value} value={i.value}>{i.label}</Radio>)}</Radio.Group></Form.Item>
+          <Form.Item name="remark" label={t('remark')}><Input.TextArea rows={3} placeholder={t('remark')} /></Form.Item>
         </Form>
       </Modal>
     </div>

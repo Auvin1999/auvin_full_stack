@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios'
 import { message, Modal, notification } from 'antd'
+import i18n from '@/i18n'
 import { getToken } from '@/utils/auth'
 import errorCode from '@/utils/errorCode'
 import { tansParams, blobValidate } from '@/utils/ruoyi'
@@ -60,7 +61,7 @@ service.interceptors.request.use(
         const s_data = sessionObj.data
         const s_time = sessionObj.time
         if (s_data === requestObj.data && requestObj.time - s_time < interval && s_url === requestObj.url) {
-          const msg = '数据正在处理，请勿重复提交'
+          const msg = i18n.t('request.duplicateSubmit')
           console.warn(`[${s_url}]: ${msg}`)
           return Promise.reject(new Error(msg))
         } else {
@@ -92,10 +93,10 @@ service.interceptors.response.use(
       if (!isRelogin.show) {
         isRelogin.show = true
         Modal.confirm({
-          title: '系统提示',
-          content: '登录状态已过期，您可以继续留在该页面，或者重新登录',
-          okText: '重新登录',
-          cancelText: '取消',
+          title: i18n.t('request.systemPrompt'),
+          content: i18n.t('request.sessionExpiredMsg'),
+          okText: i18n.t('request.relogin'),
+          cancelText: i18n.t('cancel'),
           onOk() {
             isRelogin.show = false
             useUserStore.getState().logOut().then(() => {
@@ -107,7 +108,7 @@ service.interceptors.response.use(
           }
         })
       }
-      return Promise.reject(new Error('无效的会话，或者会话已过期，请重新登录。'))
+      return Promise.reject(new Error(i18n.t('request.invalidSession')))
     } else if (code === 500) {
       message.error(msg)
       return Promise.reject(new Error(msg))
@@ -125,11 +126,11 @@ service.interceptors.response.use(
     console.log('err' + error)
     let { message: msg } = error
     if (msg === 'Network Error') {
-      msg = '后端接口连接异常'
+      msg = i18n.t('request.networkError')
     } else if (msg.includes('timeout')) {
-      msg = '系统接口请求超时'
+      msg = i18n.t('request.timeout')
     } else if (msg.includes('Request failed with status code')) {
-      msg = '系统接口' + msg.slice(-3) + '异常'
+      msg = i18n.t('request.statusCodeError', { code: msg.slice(-3) })
     }
     message.error({ content: msg, duration: 5 * 1000 })
     return Promise.reject(error)
@@ -138,7 +139,7 @@ service.interceptors.response.use(
 
 /** 通用下载方法 */
 export function download(url: string, params: Record<string, any>, filename: string, config?: Record<string, any>) {
-  const hide = message.loading('正在下载数据，请稍候...')
+  const hide = message.loading(i18n.t('request.downloading'))
   return service
     .post(url, params, {
       transformRequest: [(params: Record<string, any>) => tansParams(params)],
@@ -161,7 +162,7 @@ export function download(url: string, params: Record<string, any>, filename: str
     })
     .catch((r: any) => {
       console.error(r)
-      message.error('下载文件出现错误，请联系管理员！')
+      message.error(i18n.t('request.downloadError'))
       hide()
     })
 }

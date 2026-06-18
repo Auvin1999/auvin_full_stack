@@ -1,10 +1,12 @@
 import { Card } from 'antd'
+import { useTranslation } from 'react-i18next'
 
 export default function UserProfile() {
+  const { t } = useTranslation()
   return (
     <div>
-      <Card title="个人中心">
-        <p>个人中心页面（待开发）</p>
+      <Card title={t('navbar.profile')}>
+        <p>{t('navbar.profile')}（{t('register.placeholder')}）</p>
       </Card>
     </div>
   )

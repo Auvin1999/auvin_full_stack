@@ -19,6 +19,7 @@ export default {
   close: '关闭',
   yes: '是',
   no: '否',
+  pleaseSelect: '请选择',
 
   // 通用提示
   confirmDelete: '确认删除？',
@@ -42,8 +43,8 @@ export default {
 
   // 通用字段
   createTime: '创建时间',
-  createBy: '创建者',
   updateTime: '更新时间',
+  createBy: '创建者',
   remark: '备注',
   operation: '操作',
   serialNo: '序号',
@@ -111,6 +112,7 @@ export default {
     gen: '代码生成',
     build: '表单构建',
     profile: '个人中心',
+    ruoyiHome: '若依官网',
   },
 
   // 首页
@@ -126,6 +128,24 @@ export default {
     website: '官方网站',
     techExchange: '技术交流',
     repo: '前端仓库',
+    featureList: [
+      '使用最新技术栈，基于 React 18 + TypeScript',
+      '提供 Element Plus / Ant Design 两套 UI 方案',
+      '支持动态权限路由，按钮级别权限控制',
+      '支持多终端自适应布局',
+      '支持暗黑主题切换',
+      '完善的代码生成工具',
+      '完善的 XSS 入侵脚本过滤',
+      '支持动态加载国际化语言包',
+    ],
+    changelogV1: [
+      '初始版本，完成全部系统管理模块移植',
+      '完成登录、权限、动态路由架构',
+      '完成用户管理、角色管理、菜单管理等 CRUD 页面',
+      '完成系统监控模块（在线用户、定时任务）',
+      '完成系统工具模块（代码生成器）',
+      '支持暗黑模式、全屏、标签页右键菜单',
+    ],
   },
 
   // 用户管理
@@ -258,6 +278,7 @@ export default {
     loginStatus: '登录状态',
     description: '描述',
     accessTime: '访问时间',
+    loginAddress: '登录地址',
     unlock: '解锁',
     unlockConfirm: '确认解锁用户 {{name}}？',
     unlockSuccess: '用户 {{name}} 解锁成功',
@@ -271,6 +292,7 @@ export default {
     loginTime: '登录时间',
     forceLogout: '强退',
     forceLogoutConfirm: '确认强退用户 {{name}}？',
+    forceLogoutSuccess: '强退成功',
   },
 
   // 定时任务
@@ -315,5 +337,32 @@ export default {
     importSuccess: '导入成功',
     generateSuccess: '生成成功',
     syncSuccess: '同步成功',
+  },
+
+  // 错误页
+  error: {
+    404: '页面不存在',
+    401: '没有权限访问',
+    backHome: '返回首页',
+  },
+
+  // 注册
+  register: {
+    title: '注册页面',
+    placeholder: '待开发',
+  },
+
+  // 请求层
+  request: {
+    duplicateSubmit: '数据正在处理，请勿重复提交',
+    systemPrompt: '系统提示',
+    sessionExpiredMsg: '登录状态已过期，您可以继续留在该页面，或者重新登录',
+    relogin: '重新登录',
+    invalidSession: '无效的会话，或者会话已过期，请重新登录。',
+    networkError: '后端接口连接异常',
+    timeout: '系统接口请求超时',
+    statusCodeError: '系统接口{{code}}异常',
+    downloading: '正在下载数据，请稍候...',
+    downloadError: '下载文件出现错误，请联系管理员！',
   },
 }

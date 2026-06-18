@@ -4,8 +4,10 @@ import { SearchOutlined, ReloadOutlined, LogoutOutlined } from '@ant-design/icon
 import { list, forceLogout } from '@/api/monitor/online'
 import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils/ruoyi'
+import { useTranslation } from 'react-i18next'
 
 export default function OnlineIndex() {
+  const { t } = useTranslation()
   const [queryForm] = Form.useForm()
   const [allData, setAllData] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
@@ -25,22 +27,22 @@ export default function OnlineIndex() {
   const handleQuery = () => { setFilter(queryForm.getFieldsValue()); setQueryParams((p: any) => ({ ...p, pageNum: 1 })) }
   const resetQuery = () => { queryForm.resetFields(); setFilter({}); setQueryParams({ pageNum: 1, pageSize: 10 }) }
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
-  const handleForceLogout = async (tokenId: string) => { await forceLogout(tokenId); message.success('强退成功'); getList() }
+  const handleForceLogout = async (tokenId: string) => { await forceLogout(tokenId); message.success(t('online.forceLogoutSuccess')); getList() }
 
-  // 客户端分页
+  // Client-side pagination
   const pageData = allData.slice((queryParams.pageNum - 1) * queryParams.pageSize, queryParams.pageNum * queryParams.pageSize)
 
   const columns = [
-    { title: '序号', width: 70, render: (_: any, __: any, index: number) => (queryParams.pageNum - 1) * queryParams.pageSize + index + 1 },
-    { title: '会话编号', dataIndex: 'tokenId', width: 250, ellipsis: true },
-    { title: '登录名称', dataIndex: 'userName', width: 120, ellipsis: true },
-    { title: '主机', dataIndex: 'ipaddr', width: 150, ellipsis: true },
-    { title: '登录时间', dataIndex: 'loginTime', width: 170, render: (v: string) => parseTime(v) },
+    { title: '#', width: 70, render: (_: any, __: any, index: number) => (queryParams.pageNum - 1) * queryParams.pageSize + index + 1 },
+    { title: t('online.tokenId'), dataIndex: 'tokenId', width: 250, ellipsis: true },
+    { title: t('online.loginName'), dataIndex: 'userName', width: 120, ellipsis: true },
+    { title: t('online.host'), dataIndex: 'ipaddr', width: 150, ellipsis: true },
+    { title: t('online.loginTime'), dataIndex: 'loginTime', width: 170, render: (v: string) => parseTime(v) },
     {
-      title: '操作', width: 100, fixed: 'right' as const,
+      title: t('operation'), width: 100, fixed: 'right' as const,
       render: (_: any, record: any) => (
-        <Popconfirm title={`确认强退用户 ${record.userName}？`} onConfirm={() => handleForceLogout(record.tokenId)}>
-          <Button type="link" size="small" danger icon={<LogoutOutlined />}>强退</Button>
+        <Popconfirm title={t('online.forceLogoutConfirm', { name: record.userName })} onConfirm={() => handleForceLogout(record.tokenId)}>
+          <Button type="link" size="small" danger icon={<LogoutOutlined />}>{t('online.forceLogout')}</Button>
         </Popconfirm>
       )
     }
@@ -50,9 +52,9 @@ export default function OnlineIndex() {
     <div className="app-container">
       <Card style={{ marginBottom: 16 }}>
         <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-          <Form.Item name="ipaddr" label="登录地址"><Input placeholder="请输入登录地址" allowClear /></Form.Item>
-          <Form.Item name="userName" label="用户名称"><Input placeholder="请输入用户名称" allowClear /></Form.Item>
-          <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">搜索</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>重置</Button></Space></Form.Item>
+          <Form.Item name="ipaddr" label={t('online.host')}><Input placeholder={t('online.host')} allowClear /></Form.Item>
+          <Form.Item name="userName" label={t('online.loginName')}><Input placeholder={t('online.loginName')} allowClear /></Form.Item>
+          <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
         </Form>
       </Card>
       <Card>

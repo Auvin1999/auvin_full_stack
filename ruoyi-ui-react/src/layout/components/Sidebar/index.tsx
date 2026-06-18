@@ -22,11 +22,52 @@ import {
   CodeOutlined,
   FormOutlined,
 } from '@ant-design/icons'
+import i18n from '@/i18n'
 import { usePermissionStore, type AppRouteObject } from '@/store/usePermissionStore'
 import { useAppStore } from '@/store/useAppStore'
 import { useSettingsStore } from '@/store/useSettingsStore'
 import { isExternal } from '@/utils/validate'
 import Logo from './Logo'
+
+// 后端菜单中文标题 → i18n key 映射
+const titleI18nMap: Record<string, string> = {
+  '系统管理': 'menu.system',
+  '系统监控': 'menu.monitor',
+  '系统工具': 'menu.tool',
+  '用户管理': 'menu.user',
+  '角色管理': 'menu.role',
+  '菜单管理': 'menu.menu',
+  '部门管理': 'menu.dept',
+  '字典管理': 'menu.dict',
+  '字典数据': 'menu.dictData',
+  '参数设置': 'menu.config',
+  '参数管理': 'menu.config',
+  '通知公告': 'menu.notice',
+  '岗位管理': 'menu.post',
+  '操作日志': 'menu.operlog',
+  '登录日志': 'menu.logininfor',
+  '定时任务': 'menu.job',
+  '调度日志': 'menu.jobLog',
+  '在线用户': 'menu.online',
+  '代码生成': 'menu.gen',
+  '表单构建': 'menu.build',
+  '个人中心': 'menu.profile',
+  '首页': 'navbar.home',
+  '服务监控': 'menu.monitor',
+  '若依官网': 'menu.ruoyiHome',
+}
+
+/** 将后端标题翻译为当前语言 */
+function translateTitle(title?: string): string {
+  if (!title) return ''
+  const key = titleI18nMap[title]
+  if (key) {
+    const translated = i18n.t(key)
+    // i18n.t() 在找不到 key 时返回 key 本身，此时回退到原中文
+    return translated !== key ? translated : title
+  }
+  return title
+}
 
 // 图标映射表
 const iconMap: Record<string, React.ReactNode> = {
@@ -107,14 +148,14 @@ function buildMenuItems(routes: AppRouteObject[], parentPath = ''): MenuItem[] {
         items.push({
           key: menuKey,
           icon: getIcon(child.meta?.icon || route.meta?.icon),
-          label: child.meta?.title || route.meta?.title,
+          label: translateTitle(child.meta?.title || route.meta?.title),
         })
       } else if (visibleChildren.length > 1) {
         // 多个子路由：递归构造
         items.push({
           key: isExt ? `@ext:${linkTarget}` : fullPath,
           icon: getIcon(route.meta?.icon),
-          label: route.meta?.title,
+          label: translateTitle(route.meta?.title),
           children: buildMenuItems(route.children, fullPath),
         })
       }
@@ -124,7 +165,7 @@ function buildMenuItems(routes: AppRouteObject[], parentPath = ''): MenuItem[] {
       items.push({
         key: menuKey,
         icon: getIcon(route.meta?.icon),
-        label: route.meta?.title,
+        label: translateTitle(route.meta?.title),
       })
     }
   })
@@ -137,9 +178,9 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const { sidebarRouters } = usePermissionStore()
   const { sidebar } = useAppStore()
-  const { isDark } = useSettingsStore()
+  const { isDark, language } = useSettingsStore()
 
-  const menuItems = useMemo(() => buildMenuItems(sidebarRouters), [sidebarRouters])
+  const menuItems = useMemo(() => buildMenuItems(sidebarRouters), [sidebarRouters, language])
 
   const selectedKeys = useMemo(() => {
     return [location.pathname]

@@ -32,7 +32,7 @@ export default function TagsView() {
 
   // 初始化首页标签（affix）
   useEffect(() => {
-    addView({ path: '/', title: '首页', meta: { title: '首页', icon: 'dashboard', affix: true } })
+    addView({ path: '/', title: t('navbar.home'), meta: { title: t('navbar.home'), icon: 'dashboard', affix: true } })
   }, [])
 
   // 路由变化时添加标签

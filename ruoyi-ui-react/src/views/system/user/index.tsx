@@ -7,6 +7,7 @@ import {
   PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined,
   ReloadOutlined, KeyOutlined
 } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { listUser, getUser, addUser, updateUser, delUser, resetUserPwd, changeUserStatus } from '@/api/system/user'
 import { HasPermi } from '@/components/Permission'
 import Pagination from '@/components/Pagination'
@@ -43,6 +44,7 @@ interface QueryParams {
 }
 
 export default function UserIndex() {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [queryForm] = Form.useForm()
 
@@ -105,7 +107,7 @@ export default function UserIndex() {
   /** 新增 */
   const handleAdd = () => {
     form.resetFields()
-    setTitle('添加用户')
+    setTitle(t('user.addUser'))
     setOpen(true)
   }
 
@@ -126,7 +128,7 @@ export default function UserIndex() {
         remark: data.remark,
         deptId: data.deptId,
       })
-      setTitle('修改用户')
+      setTitle(t('user.editUser'))
       setOpen(true)
     } catch {
       // handled
@@ -137,12 +139,12 @@ export default function UserIndex() {
   const handleDelete = async (row?: UserRecord) => {
     const ids = row ? [row.userId] : selectedRowKeys
     if (ids.length === 0) {
-      message.warning('请选择要删除的数据')
+      message.warning(t('pleaseSelectData'))
       return
     }
     try {
       await delUser(ids.join(','))
-      message.success('删除成功')
+      message.success(t('deleteSuccess'))
       getList()
     } catch {
       // handled
@@ -156,10 +158,10 @@ export default function UserIndex() {
       setSubmitting(true)
       if (values.userId) {
         await updateUser(values)
-        message.success('修改成功')
+        message.success(t('editSuccess'))
       } else {
         await addUser(values)
-        message.success('新增成功')
+        message.success(t('addSuccess'))
       }
       setOpen(false)
       getList()
@@ -174,7 +176,7 @@ export default function UserIndex() {
   const handleResetPwd = async (row: UserRecord) => {
     try {
       await resetUserPwd(row.userId, 'admin123')
-      message.success(`密码已重置为 admin123`)
+      message.success(t('user.resetPwdConfirm'))
     } catch {
       // handled
     }
@@ -186,7 +188,7 @@ export default function UserIndex() {
     try {
       await changeUserStatus(row.userId, status)
       row.status = status
-      message.success('状态修改成功')
+      message.success(t('editSuccess'))
       getList()
     } catch {
       // handled
@@ -194,13 +196,13 @@ export default function UserIndex() {
   }
 
   const columns = [
-    { title: '用户编号', dataIndex: 'userId', width: 80 },
-    { title: '用户名称', dataIndex: 'userName', width: 120 },
-    { title: '用户昵称', dataIndex: 'nickName', width: 120 },
-    { title: '部门', dataIndex: ['dept', 'deptName'], width: 120 },
-    { title: '手机号码', dataIndex: 'phone', width: 130 },
+    { title: t('user.userId'), dataIndex: 'userId', width: 80 },
+    { title: t('user.userName'), dataIndex: 'userName', width: 120 },
+    { title: t('user.nickName'), dataIndex: 'nickName', width: 120 },
+    { title: t('user.dept'), dataIndex: ['dept', 'deptName'], width: 120 },
+    { title: t('user.phone'), dataIndex: 'phone', width: 130 },
     {
-      title: '状态',
+      title: t('status'),
       dataIndex: 'status',
       width: 100,
       render: (_: any, record: UserRecord) => (
@@ -211,33 +213,33 @@ export default function UserIndex() {
       )
     },
     {
-      title: '创建时间',
+      title: t('createTime'),
       dataIndex: 'createTime',
       width: 170,
       render: (text: string) => parseTime(text)
     },
     {
-      title: '操作',
+      title: t('operation'),
       width: 200,
       fixed: 'right' as const,
       render: (_: any, record: UserRecord) => (
         <Space size="small">
           <HasPermi permissions={['system:user:edit']}>
             <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>
-              修改
+              {t('edit')}
             </Button>
           </HasPermi>
           <HasPermi permissions={['system:user:remove']}>
-            <Popconfirm title="确认删除？" onConfirm={() => handleDelete(record)}>
+            <Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}>
               <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-                删除
+                {t('delete')}
               </Button>
             </Popconfirm>
           </HasPermi>
           <HasPermi permissions={['system:user:resetPwd']}>
-            <Popconfirm title="确认重置密码为 admin123？" onConfirm={() => handleResetPwd(record)}>
+            <Popconfirm title={t('user.resetPwdConfirm')} onConfirm={() => handleResetPwd(record)}>
               <Button type="link" size="small" icon={<KeyOutlined />}>
-                重置
+                {t('user.resetPwd')}
               </Button>
             </Popconfirm>
           </HasPermi>
@@ -252,14 +254,14 @@ export default function UserIndex() {
       {showSearch && (
         <Card style={{ marginBottom: 16 }}>
           <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="userName" label="用户名称">
-              <Input placeholder="请输入用户名称" allowClear />
+            <Form.Item name="userName" label={t('user.userName')}>
+              <Input placeholder={t('user.userName')} allowClear />
             </Form.Item>
-            <Form.Item name="phone" label="手机号码">
-              <Input placeholder="请输入手机号码" allowClear />
+            <Form.Item name="phone" label={t('user.phone')}>
+              <Input placeholder={t('user.phone')} allowClear />
             </Form.Item>
-            <Form.Item name="status" label="状态">
-              <Select placeholder="用户状态" allowClear style={{ width: 150 }}>
+            <Form.Item name="status" label={t('status')}>
+              <Select placeholder={t('status')} allowClear style={{ width: 150 }}>
                 {(dict.sys_normal_disable || []).map((item) => (
                   <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
                 ))}
@@ -267,8 +269,8 @@ export default function UserIndex() {
             </Form.Item>
             <Form.Item>
               <Space>
-                <Button type="primary" icon={<SearchOutlined />} htmlType="submit">搜索</Button>
-                <Button icon={<ReloadOutlined />} onClick={resetQuery}>重置</Button>
+                <Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button>
+                <Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button>
               </Space>
             </Form.Item>
           </Form>
@@ -280,7 +282,7 @@ export default function UserIndex() {
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
             <HasPermi permissions={['system:user:add']}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增</Button>
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button>
             </HasPermi>
             <HasPermi permissions={['system:user:edit']}>
               <Button
@@ -291,11 +293,11 @@ export default function UserIndex() {
                   const record = userList.find((u) => u.userId === selectedRowKeys[0])
                   if (record) handleUpdate(record)
                 }}
-              >修改</Button>
+              >{t('edit')}</Button>
             </HasPermi>
             <HasPermi permissions={['system:user:remove']}>
-              <Popconfirm title="确认删除选中的数据？" onConfirm={() => handleDelete()} disabled={selectedRowKeys.length === 0}>
-                <Button type="default" danger icon={<DeleteOutlined />} disabled={selectedRowKeys.length === 0}>删除</Button>
+              <Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={selectedRowKeys.length === 0}>
+                <Button type="default" danger icon={<DeleteOutlined />} disabled={selectedRowKeys.length === 0}>{t('delete')}</Button>
               </Popconfirm>
             </HasPermi>
           </Space>
@@ -346,34 +348,34 @@ export default function UserIndex() {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="userName" label="用户名称" rules={[{ required: true, message: '请输入用户名称' }]}>
-                <Input placeholder="请输入用户名称" disabled={!!form.getFieldValue('userId')} />
+              <Form.Item name="userName" label={t('user.userName')} rules={[{ required: true, message: t('user.userName') }]}>
+                <Input placeholder={t('user.userName')} disabled={!!form.getFieldValue('userId')} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="nickName" label="用户昵称" rules={[{ required: true, message: '请输入用户昵称' }]}>
-                <Input placeholder="请输入用户昵称" />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="phone" label="手机号码">
-                <Input placeholder="请输入手机号码" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="email" label="邮箱">
-                <Input placeholder="请输入邮箱" />
+              <Form.Item name="nickName" label={t('user.nickName')} rules={[{ required: true, message: t('user.nickName') }]}>
+                <Input placeholder={t('user.nickName')} />
               </Form.Item>
             </Col>
           </Row>
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="sex" label="用户性别">
-                <Select placeholder="请选择">
+              <Form.Item name="phone" label={t('user.phone')}>
+                <Input placeholder={t('user.phone')} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="email" label={t('user.email')}>
+                <Input placeholder={t('user.email')} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item name="sex" label={t('user.sex')}>
+                <Select placeholder={t('pleaseSelect')}>
                   {(dict.sys_user_sex || []).map((item) => (
                     <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
                   ))}
@@ -381,7 +383,7 @@ export default function UserIndex() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="status" label="状态" initialValue="0">
+              <Form.Item name="status" label={t('status')} initialValue="0">
                 <Select>
                   {(dict.sys_normal_disable || []).map((item) => (
                     <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
@@ -395,15 +397,15 @@ export default function UserIndex() {
           {!form.getFieldValue('userId') && (
             <Row gutter={16}>
               <Col span={12}>
-                <Form.Item name="password" label="用户密码" rules={[{ required: true, message: '请输入用户密码' }]}>
-                  <Input.Password placeholder="请输入用户密码" />
+                <Form.Item name="password" label={t('user.password')} rules={[{ required: true, message: t('user.password') }]}>
+                  <Input.Password placeholder={t('user.password')} />
                 </Form.Item>
               </Col>
             </Row>
           )}
 
-          <Form.Item name="remark" label="备注">
-            <Input.TextArea rows={3} placeholder="请输入备注" />
+          <Form.Item name="remark" label={t('remark')}>
+            <Input.TextArea rows={3} placeholder={t('remark')} />
           </Form.Item>
         </Form>
       </Modal>

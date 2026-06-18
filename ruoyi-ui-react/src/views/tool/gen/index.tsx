@@ -6,8 +6,10 @@ import { HasPermi } from '@/components/Permission'
 import Pagination from '@/components/Pagination'
 import RightToolbar from '@/components/RightToolbar'
 import { parseTime } from '@/utils/ruoyi'
+import { useTranslation } from 'react-i18next'
 
 export default function GenIndex() {
+  const { t } = useTranslation()
   const [queryForm] = Form.useForm()
   const [dataList, setDataList] = useState<any[]>([])
   const [total, setTotal] = useState(0)
@@ -34,16 +36,16 @@ export default function GenIndex() {
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
   const handleDelete = async (row?: any) => {
     const ids = row ? [row.tableId] : selectedRowKeys
-    if (!ids.length) { message.warning('请选择要删除的数据'); return }
-    await delTable(ids.join(',')); message.success('删除成功'); getList()
+    if (!ids.length) { message.warning(t('pleaseSelectData')); return }
+    await delTable(ids.join(',')); message.success(t('deleteSuccess')); getList()
   }
 
   const handleGenCode = async (tableName: string) => {
-    await genCode(tableName); message.success('生成成功')
+    await genCode(tableName); message.success(t('gen.generateSuccess'))
   }
 
   const handleSynchDb = async (tableName: string) => {
-    await synchDb(tableName); message.success('同步成功')
+    await synchDb(tableName); message.success(t('gen.syncSuccess'))
   }
 
   const handlePreview = async (tableId: number) => {
@@ -64,27 +66,27 @@ export default function GenIndex() {
   }
 
   const handleImport = async () => {
-    if (!dbSelectedKeys.length) { message.warning('请选择要导入的表'); return }
+    if (!dbSelectedKeys.length) { message.warning(t('pleaseSelectData')); return }
     await importTable({ tables: dbSelectedKeys.join(',') })
-    message.success('导入成功'); setImportOpen(false); getList()
+    message.success(t('gen.importSuccess')); setImportOpen(false); getList()
   }
 
   const columns = [
-    { title: '序号', width: 70, render: (_: any, __: any, i: number) => (queryParams.pageNum - 1) * queryParams.pageSize + i + 1 },
-    { title: '表名称', dataIndex: 'tableName', width: 180, ellipsis: true },
-    { title: '表描述', dataIndex: 'tableComment', width: 180, ellipsis: true },
-    { title: '实体类名称', dataIndex: 'className', width: 180, ellipsis: true },
-    { title: '创建时间', dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
-    { title: '更新时间', dataIndex: 'updateTime', width: 170, render: (v: string) => parseTime(v) },
+    { title: '#', width: 70, render: (_: any, __: any, i: number) => (queryParams.pageNum - 1) * queryParams.pageSize + i + 1 },
+    { title: t('gen.tableName'), dataIndex: 'tableName', width: 180, ellipsis: true },
+    { title: t('gen.tableComment'), dataIndex: 'tableComment', width: 180, ellipsis: true },
+    { title: t('gen.className'), dataIndex: 'className', width: 180, ellipsis: true },
+    { title: t('createTime'), dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
+    { title: t('createTime'), dataIndex: 'updateTime', width: 170, render: (v: string) => parseTime(v) },
     {
-      title: '操作', width: 350, fixed: 'right' as const,
+      title: t('operation'), width: 350, fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="small">
-          <HasPermi permissions={['tool:gen:preview']}><Button type="link" size="small" icon={<CodeOutlined />} onClick={() => handlePreview(record.tableId)}>预览</Button></HasPermi>
-          <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" onClick={() => window.open(`/tool/gen-edit?tableId=${record.tableId}`, '_blank')}>编辑</Button></HasPermi>
-          <HasPermi permissions={['tool:gen:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button></Popconfirm></HasPermi>
-          <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" icon={<SyncOutlined />} onClick={() => handleSynchDb(record.tableName)}>同步</Button></HasPermi>
-          <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" icon={<DownloadOutlined />} onClick={() => handleGenCode(record.tableName)}>生成</Button></HasPermi>
+          <HasPermi permissions={['tool:gen:preview']}><Button type="link" size="small" icon={<CodeOutlined />} onClick={() => handlePreview(record.tableId)}>{t('gen.preview')}</Button></HasPermi>
+          <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" onClick={() => window.open(`/tool/gen-edit?tableId=${record.tableId}`, '_blank')}>{t('edit')}</Button></HasPermi>
+          <HasPermi permissions={['tool:gen:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" icon={<SyncOutlined />} onClick={() => handleSynchDb(record.tableName)}>{t('gen.sync')}</Button></HasPermi>
+          <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" icon={<DownloadOutlined />} onClick={() => handleGenCode(record.tableName)}>{t('gen.generate')}</Button></HasPermi>
         </Space>
       )
     }
@@ -95,17 +97,17 @@ export default function GenIndex() {
       {showSearch && (
         <Card style={{ marginBottom: 16 }}>
           <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="tableName" label="表名称"><Input placeholder="请输入表名称" allowClear /></Form.Item>
-            <Form.Item name="tableComment" label="表描述"><Input placeholder="请输入表描述" allowClear /></Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">搜索</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>重置</Button></Space></Form.Item>
+            <Form.Item name="tableName" label={t('gen.tableName')}><Input placeholder={t('gen.tableName')} allowClear /></Form.Item>
+            <Form.Item name="tableComment" label={t('gen.tableComment')}><Input placeholder={t('gen.tableComment')} allowClear /></Form.Item>
+            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
           </Form>
         </Card>
       )}
       <Card>
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
-            <HasPermi permissions={['tool:gen:import']}><Button type="primary" icon={<ImportOutlined />} onClick={handleImportOpen} loading={dbLoading}>导入</Button></HasPermi>
-            <HasPermi permissions={['tool:gen:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>删除</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['tool:gen:import']}><Button type="primary" icon={<ImportOutlined />} onClick={handleImportOpen} loading={dbLoading}>{t('import')}</Button></HasPermi>
+            <HasPermi permissions={['tool:gen:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
         </div>
@@ -114,17 +116,17 @@ export default function GenIndex() {
       </Card>
 
       {/* 导入表弹窗 */}
-      <Modal title="导入表" open={importOpen} onOk={handleImport} onCancel={() => setImportOpen(false)} width={700} destroyOnClose>
+      <Modal title={t('gen.importTable')} open={importOpen} onOk={handleImport} onCancel={() => setImportOpen(false)} width={700} destroyOnClose>
         <Table rowKey="tableName" columns={[
-          { title: '表名称', dataIndex: 'tableName', width: 200 },
-          { title: '表描述', dataIndex: 'tableComment', width: 200 },
-          { title: '创建时间', dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
-          { title: '更新时间', dataIndex: 'updateTime', width: 170, render: (v: string) => parseTime(v) },
+          { title: t('gen.tableName'), dataIndex: 'tableName', width: 200 },
+          { title: t('gen.tableComment'), dataIndex: 'tableComment', width: 200 },
+          { title: t('createTime'), dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
+          { title: t('createTime'), dataIndex: 'updateTime', width: 170, render: (v: string) => parseTime(v) },
         ]} dataSource={dbTableList} pagination={false} size="small" rowSelection={{ selectedRowKeys: dbSelectedKeys, onChange: (k) => setDbSelectedKeys(k as string[]) }} />
       </Modal>
 
       {/* 预览代码弹窗 */}
-      <Modal title="代码预览" open={previewOpen} onCancel={() => setPreviewOpen(false)} footer={null} width={900} destroyOnClose>
+      <Modal title={t('gen.codePreview')} open={previewOpen} onCancel={() => setPreviewOpen(false)} footer={null} width={900} destroyOnClose>
         {Object.entries(previewData).map(([key, value]) => (
           <div key={key} style={{ marginBottom: 16 }}>
             <h4 style={{ marginBottom: 8 }}>{key}</h4>

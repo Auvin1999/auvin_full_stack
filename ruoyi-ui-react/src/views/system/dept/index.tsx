@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Table, Button, Form, Input, Select, TreeSelect, Radio, InputNumber, Modal, Space, Card, message, Popconfirm } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import { listDept, getDept, addDept, updateDept, delDept, listDeptExcludeChild } from '@/api/system/dept'
 import { HasPermi } from '@/components/Permission'
 import RightToolbar from '@/components/RightToolbar'
@@ -9,6 +10,7 @@ import { useDict } from '@/utils/dict'
 import { parseTime, handleTree } from '@/utils/ruoyi'
 
 export default function DeptIndex() {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [queryForm] = Form.useForm()
   const dict = useDict('sys_normal_disable')
@@ -40,7 +42,7 @@ export default function DeptIndex() {
     if (row) {
       form.setFieldsValue({ parentId: row.deptId })
     }
-    setTitle('添加部门')
+    setTitle(t('dept.addDept'))
     setOpen(true)
   }
 
@@ -49,19 +51,19 @@ export default function DeptIndex() {
     const res: any = await getDept(row.deptId)
     const data = res.data || res
     form.setFieldsValue(data)
-    setTitle('修改部门')
+    setTitle(t('dept.editDept'))
     setOpen(true)
   }
 
   const handleDelete = async (row: any) => {
-    await delDept(row.deptId); message.success('删除成功'); getList()
+    await delDept(row.deptId); message.success(t('deleteSuccess')); getList()
   }
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields(); setSubmitting(true)
       values.deptId ? await updateDept(values) : await addDept(values)
-      message.success(values.deptId ? '修改成功' : '新增成功'); setOpen(false); getList()
+      message.success(values.deptId ? t('editSuccess') : t('addSuccess')); setOpen(false); getList()
     } finally { setSubmitting(false) }
   }
 
@@ -76,17 +78,17 @@ export default function DeptIndex() {
   }
 
   const columns = [
-    { title: '部门名称', dataIndex: 'deptName', width: 260 },
-    { title: '排序', dataIndex: 'orderNum', width: 100 },
-    { title: '状态', dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_normal_disable || []} value={v} /> },
-    { title: '创建时间', dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
+    { title: t('dept.deptName'), dataIndex: 'deptName', width: 260 },
+    { title: t('dept.sort'), dataIndex: 'orderNum', width: 100 },
+    { title: t('status'), dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_normal_disable || []} value={v} /> },
+    { title: t('createTime'), dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
     {
-      title: '操作', width: 250, fixed: 'right' as const,
+      title: t('operation'), width: 250, fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="small">
-          <HasPermi permissions={['system:dept:add']}><Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAdd(record)}>新增</Button></HasPermi>
-          <HasPermi permissions={['system:dept:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>修改</Button></HasPermi>
-          <HasPermi permissions={['system:dept:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['system:dept:add']}><Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAdd(record)}>{t('add')}</Button></HasPermi>
+          <HasPermi permissions={['system:dept:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
+          <HasPermi permissions={['system:dept:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
         </Space>
       )
     }
@@ -97,18 +99,18 @@ export default function DeptIndex() {
       {showSearch && (
         <Card style={{ marginBottom: 16 }}>
           <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="deptName" label="部门名称"><Input placeholder="请输入部门名称" allowClear /></Form.Item>
-            <Form.Item name="status" label="状态">
-              <Select placeholder="部门状态" allowClear style={{ width: 120 }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+            <Form.Item name="deptName" label={t('dept.deptName')}><Input placeholder={t('dept.deptName')} allowClear /></Form.Item>
+            <Form.Item name="status" label={t('status')}>
+              <Select placeholder={t('status')} allowClear style={{ width: 120 }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
             </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">搜索</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>重置</Button></Space></Form.Item>
+            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
           </Form>
         </Card>
       )}
       <Card>
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
-            <HasPermi permissions={['system:dept:add']}><Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>新增</Button></HasPermi>
+            <HasPermi permissions={['system:dept:add']}><Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>{t('add')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
         </div>
@@ -118,15 +120,15 @@ export default function DeptIndex() {
       <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={550} destroyOnClose>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="deptId" hidden><Input /></Form.Item>
-          <Form.Item name="parentId" label="上级部门">
-            <TreeSelect placeholder="请选择上级部门" allowClear treeData={buildTreeData(list)} treeDefaultExpandAll />
+          <Form.Item name="parentId" label={t('dept.parentDept')}>
+            <TreeSelect placeholder={t('dept.parentDept')} allowClear treeData={buildTreeData(list)} treeDefaultExpandAll />
           </Form.Item>
-          <Form.Item name="deptName" label="部门名称" rules={[{ required: true, message: '请输入部门名称' }]}><Input placeholder="请输入部门名称" /></Form.Item>
-          <Form.Item name="orderNum" label="显示排序" rules={[{ required: true, message: '请输入排序' }]}><InputNumber min={0} style={{ width: '100%' }} /></Form.Item>
-          <Form.Item name="leader" label="负责人"><Input placeholder="请输入负责人" /></Form.Item>
-          <Form.Item name="phone" label="联系电话"><Input placeholder="请输入联系电话" /></Form.Item>
-          <Form.Item name="email" label="邮箱"><Input placeholder="请输入邮箱" /></Form.Item>
-          <Form.Item name="status" label="状态" initialValue="0"><Radio.Group>{(dict.sys_normal_disable || []).map((i: any) => <Radio key={i.value} value={i.value}>{i.label}</Radio>)}</Radio.Group></Form.Item>
+          <Form.Item name="deptName" label={t('dept.deptName')} rules={[{ required: true, message: t('dept.deptName') }]}><Input placeholder={t('dept.deptName')} /></Form.Item>
+          <Form.Item name="orderNum" label={t('dept.sort')} rules={[{ required: true, message: t('dept.sort') }]}><InputNumber min={0} style={{ width: '100%' }} /></Form.Item>
+          <Form.Item name="leader" label={t('dept.leader')}><Input placeholder={t('dept.leader')} /></Form.Item>
+          <Form.Item name="phone" label={t('dept.phone')}><Input placeholder={t('dept.phone')} /></Form.Item>
+          <Form.Item name="email" label={t('user.email')}><Input placeholder={t('user.email')} /></Form.Item>
+          <Form.Item name="status" label={t('status')} initialValue="0"><Radio.Group>{(dict.sys_normal_disable || []).map((i: any) => <Radio key={i.value} value={i.value}>{i.label}</Radio>)}</Radio.Group></Form.Item>
         </Form>
       </Modal>
     </div>

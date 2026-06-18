@@ -8,8 +8,10 @@ import RightToolbar from '@/components/RightToolbar'
 import DictTag from '@/components/DictTag'
 import { useDict } from '@/utils/dict'
 import { parseTime } from '@/utils/ruoyi'
+import { useTranslation } from 'react-i18next'
 
 export default function NoticeIndex() {
+  const { t } = useTranslation()
   const [form] = Form.useForm()
   const [queryForm] = Form.useForm()
   const dict = useDict('sys_notice_type', 'sys_notice_status')
@@ -33,36 +35,36 @@ export default function NoticeIndex() {
   const handleQuery = () => { setQueryParams((p: any) => ({ ...p, ...queryForm.getFieldsValue(), pageNum: 1 })) }
   const resetQuery = () => { queryForm.resetFields(); setQueryParams({ pageNum: 1, pageSize: 10 }) }
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
-  const handleAdd = () => { form.resetFields(); setTitle('添加公告'); setOpen(true) }
+  const handleAdd = () => { form.resetFields(); setTitle(t('noticeMgmt.addNotice')); setOpen(true) }
   const handleUpdate = async (row: any) => {
-    form.resetFields(); const res: any = await getNotice(row.noticeId); form.setFieldsValue(res.data || res); setTitle('修改公告'); setOpen(true)
+    form.resetFields(); const res: any = await getNotice(row.noticeId); form.setFieldsValue(res.data || res); setTitle(t('noticeMgmt.editNotice')); setOpen(true)
   }
   const handleDelete = async (row?: any) => {
     const ids = row ? [row.noticeId] : selectedRowKeys
-    if (!ids.length) { message.warning('请选择要删除的数据'); return }
-    await delNotice(ids.join(',')); message.success('删除成功'); getList()
+    if (!ids.length) { message.warning(t('pleaseSelectData')); return }
+    await delNotice(ids.join(',')); message.success(t('deleteSuccess')); getList()
   }
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields(); setSubmitting(true)
       values.noticeId ? await updateNotice(values) : await addNotice(values)
-      message.success(values.noticeId ? '修改成功' : '新增成功'); setOpen(false); getList()
+      message.success(values.noticeId ? t('editSuccess') : t('addSuccess')); setOpen(false); getList()
     } finally { setSubmitting(false) }
   }
 
   const columns = [
-    { title: '序号', dataIndex: 'noticeId', width: 80 },
-    { title: '公告标题', dataIndex: 'noticeTitle', width: 250, ellipsis: true },
-    { title: '公告类型', dataIndex: 'noticeType', width: 120, render: (v: string) => <DictTag options={dict.sys_notice_type || []} value={v} /> },
-    { title: '状态', dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_notice_status || []} value={v} /> },
-    { title: '创建者', dataIndex: 'createBy', width: 120 },
-    { title: '创建时间', dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
+    { title: t('noticeMgmt.noticeId'), dataIndex: 'noticeId', width: 80 },
+    { title: t('noticeMgmt.noticeTitle'), dataIndex: 'noticeTitle', width: 250, ellipsis: true },
+    { title: t('noticeMgmt.noticeType'), dataIndex: 'noticeType', width: 120, render: (v: string) => <DictTag options={dict.sys_notice_type || []} value={v} /> },
+    { title: t('status'), dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_notice_status || []} value={v} /> },
+    { title: t('createBy'), dataIndex: 'createBy', width: 120 },
+    { title: t('createTime'), dataIndex: 'createTime', width: 170, render: (v: string) => parseTime(v) },
     {
-      title: '操作', width: 180, fixed: 'right' as const,
+      title: t('operation'), width: 180, fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="small">
-          <HasPermi permissions={['system:notice:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>修改</Button></HasPermi>
-          <HasPermi permissions={['system:notice:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>删除</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['system:notice:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
+          <HasPermi permissions={['system:notice:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
         </Space>
       )
     }
@@ -73,20 +75,20 @@ export default function NoticeIndex() {
       {showSearch && (
         <Card style={{ marginBottom: 16 }}>
           <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="noticeTitle" label="公告标题"><Input placeholder="请输入公告标题" allowClear /></Form.Item>
-            <Form.Item name="createBy" label="创建者"><Input placeholder="请输入创建者" allowClear /></Form.Item>
-            <Form.Item name="noticeType" label="类型">
-              <Select placeholder="公告类型" allowClear style={{ width: 120 }}>{(dict.sys_notice_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+            <Form.Item name="noticeTitle" label={t('noticeMgmt.noticeTitle')}><Input placeholder={t('noticeMgmt.noticeTitle')} allowClear /></Form.Item>
+            <Form.Item name="createBy" label={t('createBy')}><Input placeholder={t('createBy')} allowClear /></Form.Item>
+            <Form.Item name="noticeType" label={t('noticeMgmt.noticeType')}>
+              <Select placeholder={t('noticeMgmt.noticeType')} allowClear style={{ width: 120 }}>{(dict.sys_notice_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
             </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">搜索</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>重置</Button></Space></Form.Item>
+            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
           </Form>
         </Card>
       )}
       <Card>
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
-            <HasPermi permissions={['system:notice:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>新增</Button></HasPermi>
-            <HasPermi permissions={['system:notice:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>删除</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['system:notice:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
+            <HasPermi permissions={['system:notice:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
         </div>
@@ -96,12 +98,12 @@ export default function NoticeIndex() {
       <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={600} destroyOnClose>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="noticeId" hidden><Input /></Form.Item>
-          <Form.Item name="noticeTitle" label="公告标题" rules={[{ required: true, message: '请输入公告标题' }]}><Input placeholder="请输入公告标题" /></Form.Item>
-          <Form.Item name="noticeType" label="公告类型" rules={[{ required: true, message: '请选择公告类型' }]}>
-            <Select placeholder="请选择">{(dict.sys_notice_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+          <Form.Item name="noticeTitle" label={t('noticeMgmt.noticeTitle')} rules={[{ required: true, message: t('noticeMgmt.noticeTitle') }]}><Input placeholder={t('noticeMgmt.noticeTitle')} /></Form.Item>
+          <Form.Item name="noticeType" label={t('noticeMgmt.noticeType')} rules={[{ required: true, message: t('noticeMgmt.noticeType') }]}>
+            <Select placeholder={t('pleaseSelect')}>{(dict.sys_notice_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
           </Form.Item>
-          <Form.Item name="status" label="状态" initialValue="0"><Radio.Group>{(dict.sys_notice_status || []).map((i: any) => <Radio key={i.value} value={i.value}>{i.label}</Radio>)}</Radio.Group></Form.Item>
-          <Form.Item name="noticeContent" label="内容"><Input.TextArea rows={8} placeholder="请输入内容" /></Form.Item>
+          <Form.Item name="status" label={t('status')} initialValue="0"><Radio.Group>{(dict.sys_notice_status || []).map((i: any) => <Radio key={i.value} value={i.value}>{i.label}</Radio>)}</Radio.Group></Form.Item>
+          <Form.Item name="noticeContent" label={t('noticeMgmt.noticeContent')}><Input.TextArea rows={8} placeholder={t('noticeMgmt.noticeContent')} /></Form.Item>
         </Form>
       </Modal>
     </div>

@@ -8,8 +8,10 @@ import RightToolbar from '@/components/RightToolbar'
 import DictTag from '@/components/DictTag'
 import { useDict } from '@/utils/dict'
 import { parseTime } from '@/utils/ruoyi'
+import { useTranslation } from 'react-i18next'
 
 export default function LogininforIndex() {
+  const { t } = useTranslation()
   const [queryForm] = Form.useForm()
   const dict = useDict('sys_common_status')
   const [dataList, setDataList] = useState<any[]>([])
@@ -31,24 +33,24 @@ export default function LogininforIndex() {
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
   const handleDelete = async (row?: any) => {
     const ids = row ? [row.infoId] : selectedRowKeys
-    if (!ids.length) { message.warning('请选择要删除的数据'); return }
-    await delLogininfor(ids.join(',')); message.success('删除成功'); getList()
+    if (!ids.length) { message.warning(t('pleaseSelectData')); return }
+    await delLogininfor(ids.join(',')); message.success(t('deleteSuccess')); getList()
   }
-  const handleClean = async () => { await cleanLogininfor(); message.success('清空成功'); getList() }
-  const handleUnlock = async (userName: string) => { await unlockLogininfor(userName); message.success('用户 ' + userName + ' 解锁成功') }
+  const handleClean = async () => { await cleanLogininfor(); message.success(t('deleteSuccess')); getList() }
+  const handleUnlock = async (userName: string) => { await unlockLogininfor(userName); message.success(t('logininfor.unlockSuccess', { name: userName })) }
 
   const columns = [
-    { title: '访问编号', dataIndex: 'infoId', width: 100 },
-    { title: '用户名称', dataIndex: 'userName', width: 130, sorter: true },
-    { title: '登录状态', dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_common_status || []} value={v} /> },
-    { title: '描述', dataIndex: 'msg', width: 250, ellipsis: true },
-    { title: '访问时间', dataIndex: 'accessTime', width: 170, render: (v: string) => parseTime(v), sorter: true },
+    { title: t('logininfor.infoId'), dataIndex: 'infoId', width: 100 },
+    { title: t('logininfor.userName'), dataIndex: 'userName', width: 130, sorter: true },
+    { title: t('logininfor.loginStatus'), dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_common_status || []} value={v} /> },
+    { title: t('logininfor.description'), dataIndex: 'msg', width: 250, ellipsis: true },
+    { title: t('logininfor.accessTime'), dataIndex: 'accessTime', width: 170, render: (v: string) => parseTime(v), sorter: true },
     {
-      title: '操作', width: 80, fixed: 'right' as const,
+      title: t('operation'), width: 80, fixed: 'right' as const,
       render: (_: any, record: any) => (
         <HasPermi permissions={['system:logininfor:unlock']}>
-          <Popconfirm title={`确认解锁用户 ${record.userName}？`} onConfirm={() => handleUnlock(record.userName)}>
-            <Button type="link" size="small" icon={<UnlockOutlined />}>解锁</Button>
+          <Popconfirm title={t('logininfor.unlockConfirm', { name: record.userName })} onConfirm={() => handleUnlock(record.userName)}>
+            <Button type="link" size="small" icon={<UnlockOutlined />}>{t('logininfor.unlock')}</Button>
           </Popconfirm>
         </HasPermi>
       )
@@ -60,20 +62,20 @@ export default function LogininforIndex() {
       {showSearch && (
         <Card style={{ marginBottom: 16 }}>
           <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="ipaddr" label="登录地址"><Input placeholder="请输入登录地址" allowClear /></Form.Item>
-            <Form.Item name="userName" label="用户名称"><Input placeholder="请输入用户名称" allowClear /></Form.Item>
-            <Form.Item name="status" label="登录状态">
-              <Select placeholder="登录状态" allowClear style={{ width: 120 }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+            <Form.Item name="ipaddr" label={t('logininfor.loginAddress')}><Input placeholder={t('logininfor.loginAddress')} allowClear /></Form.Item>
+            <Form.Item name="userName" label={t('logininfor.userName')}><Input placeholder={t('logininfor.userName')} allowClear /></Form.Item>
+            <Form.Item name="status" label={t('logininfor.loginStatus')}>
+              <Select placeholder={t('logininfor.loginStatus')} allowClear style={{ width: 120 }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
             </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">搜索</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>重置</Button></Space></Form.Item>
+            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
           </Form>
         </Card>
       )}
       <Card>
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
-            <HasPermi permissions={['system:logininfor:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>删除</Button></Popconfirm></HasPermi>
-            <HasPermi permissions={['system:logininfor:remove']}><Button type="default" danger icon={<ClearOutlined />} onClick={handleClean}>清空</Button></HasPermi>
+            <HasPermi permissions={['system:logininfor:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['system:logininfor:remove']}><Button type="default" danger icon={<ClearOutlined />} onClick={handleClean}>{t('clean')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
         </div>

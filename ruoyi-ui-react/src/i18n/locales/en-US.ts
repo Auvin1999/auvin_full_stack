@@ -19,6 +19,7 @@ export default {
   close: 'Close',
   yes: 'Yes',
   no: 'No',
+  pleaseSelect: 'Please select',
 
   // Common messages
   confirmDelete: 'Are you sure to delete?',
@@ -42,8 +43,8 @@ export default {
 
   // Common fields
   createTime: 'Created At',
-  createBy: 'Created By',
   updateTime: 'Updated At',
+  createBy: 'Created By',
   remark: 'Remark',
   operation: 'Actions',
   serialNo: 'No.',
@@ -111,6 +112,7 @@ export default {
     gen: 'Code Gen',
     build: 'Form Builder',
     profile: 'Profile',
+    ruoyiHome: 'RuoYi Website',
   },
 
   // Dashboard
@@ -126,6 +128,24 @@ export default {
     website: 'Website',
     techExchange: 'Community',
     repo: 'Repository',
+    featureList: [
+      'Latest tech stack, based on React 18 + TypeScript',
+      'Provides Element Plus / Ant Design UI solutions',
+      'Dynamic permission routing with button-level access control',
+      'Responsive multi-device layout',
+      'Dark theme support',
+      'Comprehensive code generation tool',
+      'XSS intrusion script filtering',
+      'Dynamic i18n language pack loading',
+    ],
+    changelogV1: [
+      'Initial version, all system management modules migrated',
+      'Login, permissions, and dynamic routing architecture',
+      'User, role, menu management CRUD pages',
+      'System monitoring module (online users, scheduled tasks)',
+      'System tools module (code generator)',
+      'Dark mode, fullscreen, tags view context menu',
+    ],
   },
 
   // User
@@ -258,6 +278,7 @@ export default {
     loginStatus: 'Status',
     description: 'Description',
     accessTime: 'Access Time',
+    loginAddress: 'Login Address',
     unlock: 'Unlock',
     unlockConfirm: 'Unlock user {{name}}?',
     unlockSuccess: 'User {{name}} unlocked',
@@ -271,6 +292,7 @@ export default {
     loginTime: 'Login Time',
     forceLogout: 'Force Logout',
     forceLogoutConfirm: 'Force logout user {{name}}?',
+    forceLogoutSuccess: 'Force logout successful',
   },
 
   // Job
@@ -315,5 +337,32 @@ export default {
     importSuccess: 'Import successful',
     generateSuccess: 'Generate successful',
     syncSuccess: 'Sync successful',
+  },
+
+  // Error pages
+  error: {
+    404: 'Page not found',
+    401: 'No permission',
+    backHome: 'Back to Home',
+  },
+
+  // Register
+  register: {
+    title: 'Register',
+    placeholder: 'Coming soon',
+  },
+
+  // Request layer
+  request: {
+    duplicateSubmit: 'Data is being processed, please do not submit repeatedly',
+    systemPrompt: 'System Prompt',
+    sessionExpiredMsg: 'Session has expired. You can stay on this page or re-login',
+    relogin: 'Re-login',
+    invalidSession: 'Invalid session or session expired, please re-login.',
+    networkError: 'Backend connection error',
+    timeout: 'Request timeout',
+    statusCodeError: 'Request error {{code}}',
+    downloading: 'Downloading, please wait...',
+    downloadError: 'Download failed, please contact the administrator!',
   },
 }

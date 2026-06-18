@@ -8,8 +8,10 @@ import RightToolbar from '@/components/RightToolbar'
 import DictTag from '@/components/DictTag'
 import { useDict } from '@/utils/dict'
 import { parseTime } from '@/utils/ruoyi'
+import { useTranslation } from 'react-i18next'
 
 export default function OperlogIndex() {
+  const { t } = useTranslation()
   const [queryForm] = Form.useForm()
   const dict = useDict('sys_oper_type', 'sys_common_status')
   const [dataList, setDataList] = useState<any[]>([])
@@ -33,27 +35,27 @@ export default function OperlogIndex() {
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
   const handleDelete = async (row?: any) => {
     const ids = row ? [row.operId] : selectedRowKeys
-    if (!ids.length) { message.warning('请选择要删除的数据'); return }
-    await delOperlog(ids.join(',')); message.success('删除成功'); getList()
+    if (!ids.length) { message.warning(t('pleaseSelectData')); return }
+    await delOperlog(ids.join(',')); message.success(t('deleteSuccess')); getList()
   }
-  const handleClean = async () => { await cleanOperlog(); message.success('清空成功'); getList() }
+  const handleClean = async () => { await cleanOperlog(); message.success(t('deleteSuccess')); getList() }
   const handleDetail = (row: any) => { setCurrentRow(row); setDetailOpen(true) }
 
   const columns = [
-    { title: '日志编号', dataIndex: 'operId', width: 100 },
-    { title: '系统模块', dataIndex: 'title', width: 150, ellipsis: true },
-    { title: '操作类型', dataIndex: 'businessType', width: 100, render: (v: string) => <DictTag options={dict.sys_oper_type || []} value={v} /> },
-    { title: '请求方式', dataIndex: 'requestMethod', width: 100 },
-    { title: '操作人员', dataIndex: 'operName', width: 120, sorter: true },
-    { title: '操作地址', dataIndex: 'operIp', width: 140 },
-    { title: '操作状态', dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_common_status || []} value={v} /> },
-    { title: '操作日期', dataIndex: 'operTime', width: 170, render: (v: string) => parseTime(v), sorter: true },
-    { title: '消耗时间', dataIndex: 'costTime', width: 110, render: (v: number) => v + '毫秒', sorter: true },
+    { title: t('operlog.operId'), dataIndex: 'operId', width: 100 },
+    { title: t('operlog.title'), dataIndex: 'title', width: 150, ellipsis: true },
+    { title: t('operlog.businessType'), dataIndex: 'businessType', width: 100, render: (v: string) => <DictTag options={dict.sys_oper_type || []} value={v} /> },
+    { title: t('operlog.requestMethod'), dataIndex: 'requestMethod', width: 100 },
+    { title: t('operlog.operName'), dataIndex: 'operName', width: 120, sorter: true },
+    { title: t('operlog.operIp'), dataIndex: 'operIp', width: 140 },
+    { title: t('status'), dataIndex: 'status', width: 100, render: (v: string) => <DictTag options={dict.sys_common_status || []} value={v} /> },
+    { title: t('operlog.operTime'), dataIndex: 'operTime', width: 170, render: (v: string) => parseTime(v), sorter: true },
+    { title: t('operlog.costTime'), dataIndex: 'costTime', width: 110, render: (v: number) => t('operlog.milliseconds', { time: v }), sorter: true },
     {
-      title: '操作', width: 100, fixed: 'right' as const,
+      title: t('operation'), width: 100, fixed: 'right' as const,
       render: (_: any, record: any) => (
         <HasPermi permissions={['system:operlog:query']}>
-          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => handleDetail(record)}>详情</Button>
+          <Button type="link" size="small" icon={<EyeOutlined />} onClick={() => handleDetail(record)}>{t('detail')}</Button>
         </HasPermi>
       )
     }
@@ -64,43 +66,43 @@ export default function OperlogIndex() {
       {showSearch && (
         <Card style={{ marginBottom: 16 }}>
           <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="title" label="系统模块"><Input placeholder="请输入系统模块" allowClear /></Form.Item>
-            <Form.Item name="operName" label="操作人员"><Input placeholder="请输入操作人员" allowClear /></Form.Item>
-            <Form.Item name="businessType" label="操作类型">
-              <Select placeholder="操作类型" allowClear style={{ width: 120 }}>{(dict.sys_oper_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+            <Form.Item name="title" label={t('operlog.title')}><Input placeholder={t('operlog.title')} allowClear /></Form.Item>
+            <Form.Item name="operName" label={t('operlog.operName')}><Input placeholder={t('operlog.operName')} allowClear /></Form.Item>
+            <Form.Item name="businessType" label={t('operlog.businessType')}>
+              <Select placeholder={t('operlog.businessType')} allowClear style={{ width: 120 }}>{(dict.sys_oper_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
             </Form.Item>
-            <Form.Item name="status" label="操作状态">
-              <Select placeholder="操作状态" allowClear style={{ width: 120 }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+            <Form.Item name="status" label={t('status')}>
+              <Select placeholder={t('status')} allowClear style={{ width: 120 }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
             </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">搜索</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>重置</Button></Space></Form.Item>
+            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
           </Form>
         </Card>
       )}
       <Card>
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
-            <HasPermi permissions={['system:operlog:remove']}><Popconfirm title="确认删除？" onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>删除</Button></Popconfirm></HasPermi>
-            <HasPermi permissions={['system:operlog:remove']}><Button type="default" danger icon={<ClearOutlined />} onClick={handleClean}>清空</Button></HasPermi>
+            <HasPermi permissions={['system:operlog:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['system:operlog:remove']}><Button type="default" danger icon={<ClearOutlined />} onClick={handleClean}>{t('clean')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
         </div>
         <Table rowKey="operId" columns={columns} dataSource={dataList} loading={loading} pagination={false} scroll={{ x: 1200 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>
-      <Modal title="操作日志详情" open={detailOpen} onCancel={() => setDetailOpen(false)} footer={null} width={700}>
+      <Modal title={t('operlog.detail')} open={detailOpen} onCancel={() => setDetailOpen(false)} footer={null} width={700}>
         {currentRow && (
           <Descriptions bordered column={2} size="small" style={{ marginTop: 16 }}>
-            <Descriptions.Item label="操作模块">{currentRow.title}</Descriptions.Item>
-            <Descriptions.Item label="操作类型"><DictTag options={dict.sys_oper_type || []} value={currentRow.businessType} /></Descriptions.Item>
-            <Descriptions.Item label="请求方式">{currentRow.requestMethod}</Descriptions.Item>
-            <Descriptions.Item label="操作人员">{currentRow.operName}</Descriptions.Item>
-            <Descriptions.Item label="操作地址">{currentRow.operIp}</Descriptions.Item>
-            <Descriptions.Item label="操作状态"><DictTag options={dict.sys_common_status || []} value={currentRow.status} /></Descriptions.Item>
-            <Descriptions.Item label="操作时间" span={2}>{parseTime(currentRow.operTime)}</Descriptions.Item>
-            <Descriptions.Item label="请求URL" span={2}>{currentRow.operUrl}</Descriptions.Item>
-            <Descriptions.Item label="请求参数" span={2}><pre style={{ maxHeight: 200, overflow: 'auto', margin: 0 }}>{currentRow.operParam}</pre></Descriptions.Item>
-            <Descriptions.Item label="返回参数" span={2}><pre style={{ maxHeight: 200, overflow: 'auto', margin: 0 }}>{currentRow.jsonResult}</pre></Descriptions.Item>
-            {currentRow.errorMsg && <Descriptions.Item label="错误信息" span={2}><pre style={{ color: 'red', margin: 0 }}>{currentRow.errorMsg}</pre></Descriptions.Item>}
+            <Descriptions.Item label={t('operlog.title')}>{currentRow.title}</Descriptions.Item>
+            <Descriptions.Item label={t('operlog.businessType')}><DictTag options={dict.sys_oper_type || []} value={currentRow.businessType} /></Descriptions.Item>
+            <Descriptions.Item label={t('operlog.requestMethod')}>{currentRow.requestMethod}</Descriptions.Item>
+            <Descriptions.Item label={t('operlog.operName')}>{currentRow.operName}</Descriptions.Item>
+            <Descriptions.Item label={t('operlog.operIp')}>{currentRow.operIp}</Descriptions.Item>
+            <Descriptions.Item label={t('status')}><DictTag options={dict.sys_common_status || []} value={currentRow.status} /></Descriptions.Item>
+            <Descriptions.Item label={t('operlog.operTime')} span={2}>{parseTime(currentRow.operTime)}</Descriptions.Item>
+            <Descriptions.Item label={t('operlog.operUrl')} span={2}>{currentRow.operUrl}</Descriptions.Item>
+            <Descriptions.Item label={t('operlog.operParam')} span={2}><pre style={{ maxHeight: 200, overflow: 'auto', margin: 0 }}>{currentRow.operParam}</pre></Descriptions.Item>
+            <Descriptions.Item label={t('operlog.jsonResult')} span={2}><pre style={{ maxHeight: 200, overflow: 'auto', margin: 0 }}>{currentRow.jsonResult}</pre></Descriptions.Item>
+            {currentRow.errorMsg && <Descriptions.Item label={t('operlog.errorMsg')} span={2}><pre style={{ color: 'red', margin: 0 }}>{currentRow.errorMsg}</pre></Descriptions.Item>}
           </Descriptions>
         )}
       </Modal>
