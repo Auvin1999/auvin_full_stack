@@ -113,24 +113,21 @@ function AuthGuard() {
   const location = useLocation()
   const navigate = useNavigate()
   const { token, roles, getInfo } = useUserStore()
-  const { generateRoutes } = usePermissionStore()
+  const { generateRoutes, sidebarRouters } = usePermissionStore()
   const [ready, setReady] = useState(false)
   const [dynamicRoutes, setDynamicRoutes] = useState<RouteObject[]>([])
 
-  // 决定当前渲染用哪套路由
   const hasToken = !!token
   const whiteList = ['/login', '/register']
   const isWhitelist = whiteList.includes(location.pathname)
+  const routesLoaded = sidebarRouters.length > 0 || dynamicRoutes.length > 0
 
-  // 无 token 时只用常量路由（登录/注册/错误页）
-  // 有 token 时用动态路由（如果已加载）或常量路由兜底
   const activeRoutes = !hasToken
     ? constantRouteObjects
     : dynamicRoutes.length > 0
       ? dynamicRoutes
       : constantRouteObjects
 
-  // 始终调用 useRoutes —— 这是 Hooks 规则的要求
   const element = useRoutes(activeRoutes)
 
   const initRoutes = useCallback(async () => {
@@ -154,7 +151,8 @@ function AuthGuard() {
     if (hasToken) {
       if (path === '/login') {
         navigate('/', { replace: true })
-      } else if (roles.length === 0 && !ready) {
+      } else if (!routesLoaded && !ready) {
+        // 有 token 但路由未加载（首次登录或刷新），初始化路由
         initRoutes()
       } else if (!ready) {
         setReady(true)
@@ -165,7 +163,7 @@ function AuthGuard() {
       }
       if (!ready) setReady(true)
     }
-  }, [location.pathname, hasToken, roles.length])
+  }, [location.pathname, hasToken, routesLoaded])
 
   // 未就绪且有 token → 加载中
   if (hasToken && !ready) {
