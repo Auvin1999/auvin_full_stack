@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message, Popconfirm, Tree } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message, Tree } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { confirmDelete } from '@/utils/confirm'
 import { listRole, getRole, addRole, updateRole, delRole } from '@/api/system/role'
 import { treeselect as menuTreeselect, roleMenuTreeselect } from '@/api/system/menu'
 import { HasPermi } from '@/components/Permission'
@@ -79,7 +80,7 @@ export default function RoleIndex() {
       render: (_: any, record: any) => (
         <Space size="small">
           <HasPermi permissions={['system:role:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
-          <HasPermi permissions={['system:role:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['system:role:remove']}><Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ onOk: () => handleDelete(record) })}>{t('delete')}</Button></HasPermi>
           <HasPermi permissions={['system:role:edit']}><Button type="link" size="small" onClick={() => handleMenuPerm(record)}>{t('role.menuPerm')}</Button></HasPermi>
         </Space>
       )
@@ -104,9 +105,9 @@ export default function RoleIndex() {
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
             <HasPermi permissions={['system:role:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
-            <HasPermi permissions={['system:role:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['system:role:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
-          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
+          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/role/export" exportParams={queryParams} exportFilename="角色数据.xlsx" />
         </div>
         <Table rowKey="roleId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 1000 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />

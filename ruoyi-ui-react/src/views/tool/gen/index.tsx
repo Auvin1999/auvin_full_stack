@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Space, Card, message, Popconfirm, Modal } from 'antd'
+import { Table, Button, Form, Input, Select, Space, Card, message, Modal } from 'antd'
 import { DeleteOutlined, SearchOutlined, ReloadOutlined, SyncOutlined, CodeOutlined, DownloadOutlined, ImportOutlined } from '@ant-design/icons'
 import { listTable, delTable, genCode, synchDb, previewTable, listDbTable, importTable } from '@/api/tool/gen'
 import { HasPermi } from '@/components/Permission'
@@ -7,6 +7,7 @@ import Pagination from '@/components/Pagination'
 import RightToolbar from '@/components/RightToolbar'
 import { parseTime } from '@/utils/ruoyi'
 import { useTranslation } from 'react-i18next'
+import { confirmDelete } from '@/utils/confirm'
 
 export default function GenIndex() {
   const { t } = useTranslation()
@@ -84,7 +85,7 @@ export default function GenIndex() {
         <Space size="small">
           <HasPermi permissions={['tool:gen:preview']}><Button type="link" size="small" icon={<CodeOutlined />} onClick={() => handlePreview(record.tableId)}>{t('gen.preview')}</Button></HasPermi>
           <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" onClick={() => window.open(`/tool/gen-edit?tableId=${record.tableId}`, '_blank')}>{t('edit')}</Button></HasPermi>
-          <HasPermi permissions={['tool:gen:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['tool:gen:remove']}><Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ onOk: () => handleDelete(record) })}>{t('delete')}</Button></HasPermi>
           <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" icon={<SyncOutlined />} onClick={() => handleSynchDb(record.tableName)}>{t('gen.sync')}</Button></HasPermi>
           <HasPermi permissions={['tool:gen:edit']}><Button type="link" size="small" icon={<DownloadOutlined />} onClick={() => handleGenCode(record.tableName)}>{t('gen.generate')}</Button></HasPermi>
         </Space>
@@ -107,7 +108,7 @@ export default function GenIndex() {
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
             <HasPermi permissions={['tool:gen:import']}><Button type="primary" icon={<ImportOutlined />} onClick={handleImportOpen} loading={dbLoading}>{t('import')}</Button></HasPermi>
-            <HasPermi permissions={['tool:gen:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['tool:gen:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
         </div>

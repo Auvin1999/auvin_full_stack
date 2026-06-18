@@ -1,13 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   Table, Button, Form, Input, Select, Switch, Modal, Space, Row, Col,
-  message, Popconfirm, Card, DatePicker, TreeSelect, InputNumber
+  message, Card, DatePicker, TreeSelect, InputNumber
 } from 'antd'
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined,
   ReloadOutlined, KeyOutlined
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { confirmDelete } from '@/utils/confirm'
 import { listUser, getUser, addUser, updateUser, delUser, resetUserPwd, changeUserStatus } from '@/api/system/user'
 import { HasPermi } from '@/components/Permission'
 import Pagination from '@/components/Pagination'
@@ -230,18 +231,14 @@ export default function UserIndex() {
             </Button>
           </HasPermi>
           <HasPermi permissions={['system:user:remove']}>
-            <Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}>
-              <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-                {t('delete')}
-              </Button>
-            </Popconfirm>
+            <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ onOk: () => handleDelete(record) })}>
+              {t('delete')}
+            </Button>
           </HasPermi>
           <HasPermi permissions={['system:user:resetPwd']}>
-            <Popconfirm title={t('user.resetPwdConfirm')} onConfirm={() => handleResetPwd(record)}>
-              <Button type="link" size="small" icon={<KeyOutlined />}>
-                {t('user.resetPwd')}
-              </Button>
-            </Popconfirm>
+            <Button type="link" size="small" icon={<KeyOutlined />} onClick={() => confirmDelete({ content: t('user.resetPwdConfirm'), onOk: () => handleResetPwd(record) })}>
+              {t('user.resetPwd')}
+            </Button>
           </HasPermi>
         </Space>
       )
@@ -296,15 +293,16 @@ export default function UserIndex() {
               >{t('edit')}</Button>
             </HasPermi>
             <HasPermi permissions={['system:user:remove']}>
-              <Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={selectedRowKeys.length === 0}>
-                <Button type="default" danger icon={<DeleteOutlined />} disabled={selectedRowKeys.length === 0}>{t('delete')}</Button>
-              </Popconfirm>
+              <Button type="default" danger icon={<DeleteOutlined />} disabled={selectedRowKeys.length === 0} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button>
             </HasPermi>
           </Space>
           <RightToolbar
             showSearch={showSearch}
             onToggleSearch={() => setShowSearch(!showSearch)}
             onRefresh={getList}
+            exportUrl="/system/user/export"
+            exportParams={queryParams}
+            exportFilename="用户数据.xlsx"
           />
         </div>
 

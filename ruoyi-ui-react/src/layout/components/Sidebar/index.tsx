@@ -180,7 +180,14 @@ export default function Sidebar() {
   const { sidebar } = useAppStore()
   const { isDark, language } = useSettingsStore()
 
-  const menuItems = useMemo(() => buildMenuItems(sidebarRouters), [sidebarRouters, language])
+  const menuItems = useMemo(() => {
+    const homeItem: MenuItem = {
+      key: '/',
+      icon: <DashboardOutlined />,
+      label: translateTitle('首页'),
+    }
+    return [homeItem, ...buildMenuItems(sidebarRouters)]
+  }, [sidebarRouters, language])
 
   const selectedKeys = useMemo(() => {
     return [location.pathname]

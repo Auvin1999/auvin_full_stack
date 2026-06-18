@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message, Popconfirm } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { listType, getType, addType, updateType, delType, refreshCache as refreshCacheApi } from '@/api/system/dict/type'
 import { HasPermi } from '@/components/Permission'
@@ -11,6 +11,7 @@ import { useDictStore } from '@/store/useDictStore'
 import { parseTime } from '@/utils/ruoyi'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { confirmDelete } from '@/utils/confirm'
 
 export default function DictTypeIndex() {
   const { t } = useTranslation()
@@ -73,7 +74,7 @@ export default function DictTypeIndex() {
       render: (_: any, record: any) => (
         <Space size="small">
           <HasPermi permissions={['system:dict:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
-          <HasPermi permissions={['system:dict:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['system:dict:remove']}><Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ onOk: () => handleDelete(record) })}>{t('delete')}</Button></HasPermi>
         </Space>
       )
     }
@@ -97,10 +98,10 @@ export default function DictTypeIndex() {
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
             <HasPermi permissions={['system:dict:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
-            <HasPermi permissions={['system:dict:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['system:dict:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
             <HasPermi permissions={['system:dict:edit']}><Button type="default" onClick={handleRefreshCache}>{t('refreshCache')}</Button></HasPermi>
           </Space>
-          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
+          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/dict/type/export" exportParams={queryParams} exportFilename="字典数据.xlsx" />
         </div>
         <Table rowKey="dictId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 1000 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />

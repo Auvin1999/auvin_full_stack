@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, TreeSelect, Radio, InputNumber, Modal, Space, Card, message, Popconfirm, Switch } from 'antd'
+import { Table, Button, Form, Input, Select, TreeSelect, Radio, InputNumber, Modal, Space, Card, message, Switch } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { confirmDelete } from '@/utils/confirm'
 import { listMenu, getMenu, addMenu, updateMenu, delMenu } from '@/api/system/menu'
 import { HasPermi } from '@/components/Permission'
 import RightToolbar from '@/components/RightToolbar'
@@ -73,7 +74,7 @@ export default function MenuIndex() {
         <Space size="small">
           <HasPermi permissions={['system:menu:add']}><Button type="link" size="small" icon={<PlusOutlined />} onClick={() => handleAdd(record)}>{t('add')}</Button></HasPermi>
           <HasPermi permissions={['system:menu:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
-          <HasPermi permissions={['system:menu:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['system:menu:remove']}><Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ onOk: () => handleDelete(record) })}>{t('delete')}</Button></HasPermi>
         </Space>
       )
     }
@@ -93,7 +94,7 @@ export default function MenuIndex() {
       <Card>
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space><HasPermi permissions={['system:menu:add']}><Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>{t('add')}</Button></HasPermi></Space>
-          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
+          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/menu/export" exportParams={{}} exportFilename="菜单数据.xlsx" />
         </div>
         <Table rowKey="menuId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 1100 }}
           expandable={{ expandedRowKeys, onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as React.Key[]) }} />

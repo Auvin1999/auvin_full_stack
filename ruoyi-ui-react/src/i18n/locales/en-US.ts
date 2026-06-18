@@ -146,6 +146,22 @@ export default {
       'System tools module (code generator)',
       'Dark mode, fullscreen, tags view context menu',
     ],
+    desc: {
+      user: 'Manage user accounts',
+      role: 'Configure role permissions',
+      menu: 'Manage menu routes',
+      dept: 'Manage departments',
+      dict: 'Manage data dictionaries',
+      config: 'Manage system parameters',
+      notice: 'Publish system notices',
+      post: 'Manage positions',
+      operlog: 'View operation logs',
+      logininfor: 'View login logs',
+      online: 'View online users',
+      job: 'Manage scheduled jobs',
+      gen: 'Auto-generate code',
+      build: 'Drag & drop form builder',
+    },
   },
 
   // User

@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message, Popconfirm } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
+import { confirmDelete } from '@/utils/confirm'
 import { listPost, getPost, addPost, updatePost, delPost } from '@/api/system/post'
 import { HasPermi } from '@/components/Permission'
 import Pagination from '@/components/Pagination'
@@ -64,7 +65,7 @@ export default function PostIndex() {
       render: (_: any, record: any) => (
         <Space size="small">
           <HasPermi permissions={['system:post:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
-          <HasPermi permissions={['system:post:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['system:post:remove']}><Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ onOk: () => handleDelete(record) })}>{t('delete')}</Button></HasPermi>
         </Space>
       )
     }
@@ -90,9 +91,9 @@ export default function PostIndex() {
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
             <HasPermi permissions={['system:post:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
-            <HasPermi permissions={['system:post:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['system:post:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
-          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
+          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/post/export" exportParams={queryParams} exportFilename="岗位数据.xlsx" />
         </div>
         <Table rowKey="postId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 900 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />

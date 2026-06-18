@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message, Popconfirm, InputNumber } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message, InputNumber } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, CaretRightOutlined } from '@ant-design/icons'
 import { listJob, getJob, addJob, updateJob, delJob, changeJobStatus, runJob } from '@/api/monitor/job'
 import { HasPermi } from '@/components/Permission'
@@ -9,6 +9,7 @@ import DictTag from '@/components/DictTag'
 import { useDict } from '@/utils/dict'
 import { parseTime } from '@/utils/ruoyi'
 import { useTranslation } from 'react-i18next'
+import { confirmDelete } from '@/utils/confirm'
 
 export default function JobIndex() {
   const { t } = useTranslation()
@@ -72,7 +73,7 @@ export default function JobIndex() {
         <Space size="small">
           <HasPermi permissions={['monitor:job:changeStatus']}><Button type="link" size="small" onClick={() => handleStatusChange(record)}>{record.status === '0' ? t('job.pause') : t('job.resume')}</Button></HasPermi>
           <HasPermi permissions={['monitor:job:edit']}><Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleUpdate(record)}>{t('edit')}</Button></HasPermi>
-          <HasPermi permissions={['monitor:job:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete(record)}><Button type="link" size="small" danger icon={<DeleteOutlined />}>{t('delete')}</Button></Popconfirm></HasPermi>
+          <HasPermi permissions={['monitor:job:remove']}><Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => confirmDelete({ onOk: () => handleDelete(record) })}>{t('delete')}</Button></HasPermi>
           <HasPermi permissions={['monitor:job:changeStatus']}><Button type="link" size="small" icon={<CaretRightOutlined />} onClick={() => handleRun(record)}>{t('job.runOnce')}</Button></HasPermi>
         </Space>
       )
@@ -99,9 +100,9 @@ export default function JobIndex() {
         <div style={{ display: 'flex', marginBottom: 16 }}>
           <Space>
             <HasPermi permissions={['monitor:job:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
-            <HasPermi permissions={['monitor:job:remove']}><Popconfirm title={t('confirmDelete')} onConfirm={() => handleDelete()} disabled={!selectedRowKeys.length}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length}>{t('delete')}</Button></Popconfirm></HasPermi>
+            <HasPermi permissions={['monitor:job:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
-          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
+          <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/schedule/job/export" exportParams={queryParams} exportFilename="任务数据.xlsx" />
         </div>
         <Table rowKey="jobId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 1200 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />

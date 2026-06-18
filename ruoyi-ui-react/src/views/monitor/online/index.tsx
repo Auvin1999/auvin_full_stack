@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Space, Card, message, Popconfirm } from 'antd'
+import { Table, Button, Form, Input, Space, Card, message } from 'antd'
 import { SearchOutlined, ReloadOutlined, LogoutOutlined } from '@ant-design/icons'
 import { list, forceLogout } from '@/api/monitor/online'
 import Pagination from '@/components/Pagination'
 import { parseTime } from '@/utils/ruoyi'
 import { useTranslation } from 'react-i18next'
+import { confirmAction } from '@/utils/confirm'
 
 export default function OnlineIndex() {
   const { t } = useTranslation()
@@ -41,9 +42,7 @@ export default function OnlineIndex() {
     {
       title: t('operation'), width: 100, fixed: 'right' as const,
       render: (_: any, record: any) => (
-        <Popconfirm title={t('online.forceLogoutConfirm', { name: record.userName })} onConfirm={() => handleForceLogout(record.tokenId)}>
-          <Button type="link" size="small" danger icon={<LogoutOutlined />}>{t('online.forceLogout')}</Button>
-        </Popconfirm>
+        <Button type="link" size="small" danger icon={<LogoutOutlined />} onClick={() => confirmAction({ content: t('online.forceLogoutConfirm', { name: record.userName }), onOk: () => handleForceLogout(record.tokenId) })}>{t('online.forceLogout')}</Button>
       )
     }
   ]
