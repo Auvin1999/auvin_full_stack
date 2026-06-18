@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Space, Card, message } from 'antd'
+import { Table, Button, Form, Input, Space, Card, message, Row, Col } from 'antd'
 import { SearchOutlined, ReloadOutlined, LogoutOutlined } from '@ant-design/icons'
 import { list, forceLogout } from '@/api/monitor/online'
 import Pagination from '@/components/Pagination'
@@ -50,10 +50,12 @@ export default function OnlineIndex() {
   return (
     <div className="app-container">
       <Card style={{ marginBottom: 16 }}>
-        <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-          <Form.Item name="ipaddr" label={t('online.host')}><Input placeholder={t('online.host')} allowClear /></Form.Item>
-          <Form.Item name="userName" label={t('online.loginName')}><Input placeholder={t('online.loginName')} allowClear /></Form.Item>
-          <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+        <Form form={queryForm} onFinish={handleQuery}>
+          <Row gutter={16}>
+            <Col span={8}><Form.Item name="ipaddr" label={t('online.host')}><Input placeholder={t('online.host')} allowClear /></Form.Item></Col>
+            <Col span={8}><Form.Item name="userName" label={t('online.loginName')}><Input placeholder={t('online.loginName')} allowClear /></Form.Item></Col>
+            <Col span={8}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+          </Row>
         </Form>
       </Card>
       <Card>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Space, Card, message, Modal } from 'antd'
+import { Table, Button, Form, Input, Select, Space, Card, message, Modal, Row, Col } from 'antd'
 import { DeleteOutlined, SearchOutlined, ReloadOutlined, SyncOutlined, CodeOutlined, DownloadOutlined, ImportOutlined } from '@ant-design/icons'
 import { listTable, delTable, genCode, synchDb, previewTable, listDbTable, importTable } from '@/api/tool/gen'
 import { HasPermi } from '@/components/Permission'
@@ -95,29 +95,31 @@ export default function GenIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="tableName" label={t('gen.tableName')}><Input placeholder={t('gen.tableName')} allowClear /></Form.Item>
-            <Form.Item name="tableComment" label={t('gen.tableComment')}><Input placeholder={t('gen.tableComment')} allowClear /></Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="tableName" label={t('gen.tableName')}><Input placeholder={t('gen.tableName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="tableComment" label={t('gen.tableComment')}><Input placeholder={t('gen.tableComment')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['tool:gen:import']}><Button type="primary" icon={<ImportOutlined />} onClick={handleImportOpen} loading={dbLoading}>{t('import')}</Button></HasPermi>
             <HasPermi permissions={['tool:gen:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="tableId" columns={columns} dataSource={dataList} loading={loading} pagination={false} scroll={{ x: 1200 }} rowSelection={{ selectedRowKeys, onChange: (k) => setDbSelectedKeys(k as string[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>
 
       {/* 导入表弹窗 */}
-      <Modal title={t('gen.importTable')} open={importOpen} onOk={handleImport} onCancel={() => setImportOpen(false)} width={700} destroyOnClose>
+      <Modal title={t('gen.importTable')} open={importOpen} onOk={handleImport} onCancel={() => setImportOpen(false)} width={700} destroyOnHidden>
         <Table rowKey="tableName" columns={[
           { title: t('gen.tableName'), dataIndex: 'tableName', width: 200 },
           { title: t('gen.tableComment'), dataIndex: 'tableComment', width: 200 },
@@ -127,7 +129,7 @@ export default function GenIndex() {
       </Modal>
 
       {/* 预览代码弹窗 */}
-      <Modal title={t('gen.codePreview')} open={previewOpen} onCancel={() => setPreviewOpen(false)} footer={null} width={900} destroyOnClose>
+      <Modal title={t('gen.codePreview')} open={previewOpen} onCancel={() => setPreviewOpen(false)} footer={null} width={900} destroyOnHidden>
         {Object.entries(previewData).map(([key, value]) => (
           <div key={key} style={{ marginBottom: 16 }}>
             <h4 style={{ marginBottom: 8 }}>{key}</h4>

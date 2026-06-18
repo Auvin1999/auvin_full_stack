@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { lazy } from 'react'
+import { lazy, createElement } from 'react'
 import { getRouters } from '@/api/menu'
 
 // 后端菜单数据结构
@@ -63,20 +63,26 @@ const InnerLink = lazy(() => import('@/layout/components/InnerLink'))
 
 /**
  * 动态加载视图组件
+ * 使用相对路径 glob，key 格式为 '../views/xxx/index.tsx'
  */
-const viewModules = import.meta.glob('@/views/**/*.tsx')
+const viewModules = import.meta.glob('../views/**/*.tsx')
 
 function loadView(view: string): React.LazyExoticComponent<React.ComponentType<any>> | undefined {
-  const key = `/src/views/${view}.tsx`
-  if (viewModules[key]) {
-    return lazy(viewModules[key] as () => Promise<{ default: React.ComponentType<any> }>)
-  }
-  const indexKey = `/src/views/${view}/index.tsx`
+  // 尝试精确匹配：../views/system/user/index.tsx
+  const indexKey = `../views/${view}/index.tsx`
   if (viewModules[indexKey]) {
     return lazy(viewModules[indexKey] as () => Promise<{ default: React.ComponentType<any> }>)
   }
-  console.warn(`[router] view not found: ${view}`)
-  return undefined
+  // 尝试直接文件：../views/system/user.tsx
+  const fileKey = `../views/${view}.tsx`
+  if (viewModules[fileKey]) {
+    return lazy(viewModules[fileKey] as () => Promise<{ default: React.ComponentType<any> }>)
+  }
+  console.warn(`[router] view not found: ${view} (tried ${indexKey} and ${fileKey})`)
+  // 返回占位组件，避免页面空白
+  return lazy(() => Promise.resolve({
+    default: () => createElement('div', { style: { padding: 24, textAlign: 'center' as const, color: '#999' } }, `页面 ${view} 待开发`)
+  }))
 }
 
 /**

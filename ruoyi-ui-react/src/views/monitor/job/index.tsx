@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message, InputNumber } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message, InputNumber, Row, Col } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined, CaretRightOutlined } from '@ant-design/icons'
 import { listJob, getJob, addJob, updateJob, delJob, changeJobStatus, runJob } from '@/api/monitor/job'
 import { HasPermi } from '@/components/Permission'
@@ -82,32 +82,36 @@ export default function JobIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="jobName" label={t('job.jobName')}><Input placeholder={t('job.jobName')} allowClear /></Form.Item>
-            <Form.Item name="jobGroup" label={t('job.jobGroup')}>
-              <Select placeholder={t('pleaseSelect')} allowClear style={{ width: 120 }}>{(dict.sys_job_group || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item name="status" label={t('status')}>
-              <Select placeholder={t('status')} allowClear style={{ width: 120 }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="jobName" label={t('job.jobName')}><Input placeholder={t('job.jobName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="jobGroup" label={t('job.jobGroup')}>
+                <Select placeholder={t('pleaseSelect')} allowClear style={{ width: '100%' }}>{(dict.sys_job_group || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+              <Col span={8}><Form.Item name="status" label={t('status')}>
+                <Select placeholder={t('status')} allowClear style={{ width: '100%' }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['monitor:job:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
             <HasPermi permissions={['monitor:job:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/schedule/job/export" exportParams={queryParams} exportFilename="任务数据.xlsx" />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="jobId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 1200 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>
-      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={600} destroyOnClose>
+      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={600} destroyOnHidden>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="jobId" hidden><Input /></Form.Item>
           <Form.Item name="jobName" label={t('job.jobName')} rules={[{ required: true, message: t('job.jobName') }]}><Input placeholder={t('job.jobName')} /></Form.Item>

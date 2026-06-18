@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, TreeSelect, Radio, InputNumber, Modal, Space, Card, message } from 'antd'
+import { Table, Button, Form, Input, Select, TreeSelect, Radio, InputNumber, Modal, Space, Card, message, Row, Col } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { confirmDelete } from '@/utils/confirm'
@@ -97,28 +97,30 @@ export default function DeptIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="deptName" label={t('dept.deptName')}><Input placeholder={t('dept.deptName')} allowClear /></Form.Item>
-            <Form.Item name="status" label={t('status')}>
-              <Select placeholder={t('status')} allowClear style={{ width: 120 }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="deptName" label={t('dept.deptName')}><Input placeholder={t('dept.deptName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="status" label={t('status')}>
+                <Select placeholder={t('status')} allowClear style={{ width: '100%' }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+              <Col span={8}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['system:dept:add']}><Button type="primary" icon={<PlusOutlined />} onClick={() => handleAdd()}>{t('add')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/dept/list/export" exportParams={{}} exportFilename="部门数据.xlsx" />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="deptId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 900 }}
           expandable={{ expandedRowKeys, onExpandedRowsChange: (keys) => setExpandedRowKeys(keys as React.Key[]) }} />
       </Card>
-      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={550} destroyOnClose>
+      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={550} destroyOnHidden>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="deptId" hidden><Input /></Form.Item>
           <Form.Item name="parentId" label={t('dept.parentDept')}>

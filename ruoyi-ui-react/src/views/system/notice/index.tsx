@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, Modal, Space, Card, message, Row, Col } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { listNotice, getNotice, addNotice, updateNotice, delNotice } from '@/api/system/notice'
 import { HasPermi } from '@/components/Permission'
@@ -73,30 +73,34 @@ export default function NoticeIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="noticeTitle" label={t('noticeMgmt.noticeTitle')}><Input placeholder={t('noticeMgmt.noticeTitle')} allowClear /></Form.Item>
-            <Form.Item name="createBy" label={t('createBy')}><Input placeholder={t('createBy')} allowClear /></Form.Item>
-            <Form.Item name="noticeType" label={t('noticeMgmt.noticeType')}>
-              <Select placeholder={t('noticeMgmt.noticeType')} allowClear style={{ width: 120 }}>{(dict.sys_notice_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="noticeTitle" label={t('noticeMgmt.noticeTitle')}><Input placeholder={t('noticeMgmt.noticeTitle')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="createBy" label={t('createBy')}><Input placeholder={t('createBy')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="noticeType" label={t('noticeMgmt.noticeType')}>
+                <Select placeholder={t('noticeMgmt.noticeType')} allowClear style={{ width: '100%' }}>{(dict.sys_notice_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['system:notice:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
             <HasPermi permissions={['system:notice:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/notice/export" exportParams={queryParams} exportFilename="公告数据.xlsx" />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="noticeId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 900 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>
-      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={600} destroyOnClose>
+      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={600} destroyOnHidden>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="noticeId" hidden><Input /></Form.Item>
           <Form.Item name="noticeTitle" label={t('noticeMgmt.noticeTitle')} rules={[{ required: true, message: t('noticeMgmt.noticeTitle') }]}><Input placeholder={t('noticeMgmt.noticeTitle')} /></Form.Item>

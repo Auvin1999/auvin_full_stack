@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Modal, Space, Card, message, Descriptions } from 'antd'
+import { Table, Button, Form, Input, Select, Modal, Space, Card, message, Descriptions, DatePicker, Row, Col } from 'antd'
+import dayjs from 'dayjs'
 import { DeleteOutlined, SearchOutlined, ReloadOutlined, EyeOutlined, ClearOutlined } from '@ant-design/icons'
 import { list, delOperlog, cleanOperlog } from '@/api/system/operlog'
 import { HasPermi } from '@/components/Permission'
@@ -7,7 +8,7 @@ import Pagination from '@/components/Pagination'
 import RightToolbar from '@/components/RightToolbar'
 import DictTag from '@/components/DictTag'
 import { useDict } from '@/utils/dict'
-import { parseTime } from '@/utils/ruoyi'
+import { parseTime, addDateRange } from '@/utils/ruoyi'
 import { useTranslation } from 'react-i18next'
 import { confirmDelete } from '@/utils/confirm'
 
@@ -23,16 +24,17 @@ export default function OperlogIndex() {
   const [queryParams, setQueryParams] = useState<any>({ pageNum: 1, pageSize: 10 })
   const [detailOpen, setDetailOpen] = useState(false)
   const [currentRow, setCurrentRow] = useState<any>(null)
+  const [dateRange, setDateRange] = useState<string[]>([])
 
   const getList = useCallback(async () => {
     setLoading(true)
-    try { const res: any = await list(queryParams); setDataList(res.rows || []); setTotal(res.total || 0) } finally { setLoading(false) }
-  }, [queryParams])
+    try { const res: any = await list(addDateRange(queryParams, dateRange)); setDataList(res.rows || []); setTotal(res.total || 0) } finally { setLoading(false) }
+  }, [queryParams, dateRange])
 
   useEffect(() => { getList() }, [getList])
 
   const handleQuery = () => { setQueryParams((p: any) => ({ ...p, ...queryForm.getFieldsValue(), pageNum: 1 })) }
-  const resetQuery = () => { queryForm.resetFields(); setQueryParams({ pageNum: 1, pageSize: 10 }) }
+  const resetQuery = () => { setDateRange([]); queryForm.resetFields(); setQueryParams({ pageNum: 1, pageSize: 10 }) }
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
   const handleDelete = async (row?: any) => {
     const ids = row ? [row.operId] : selectedRowKeys
@@ -64,29 +66,47 @@ export default function OperlogIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="title" label={t('operlog.title')}><Input placeholder={t('operlog.title')} allowClear /></Form.Item>
-            <Form.Item name="operName" label={t('operlog.operName')}><Input placeholder={t('operlog.operName')} allowClear /></Form.Item>
-            <Form.Item name="businessType" label={t('operlog.businessType')}>
-              <Select placeholder={t('operlog.businessType')} allowClear style={{ width: 120 }}>{(dict.sys_oper_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item name="status" label={t('status')}>
-              <Select placeholder={t('status')} allowClear style={{ width: 120 }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="title" label={t('operlog.title')}><Input placeholder={t('operlog.title')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="operName" label={t('operlog.operName')}><Input placeholder={t('operlog.operName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="businessType" label={t('operlog.businessType')}>
+                <Select placeholder={t('operlog.businessType')} allowClear style={{ width: '100%' }}>{(dict.sys_oper_type || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="status" label={t('status')}>
+                <Select placeholder={t('status')} allowClear style={{ width: '100%' }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+              <Col span={8}><Form.Item label={t('operlog.operTime')}>
+                <DatePicker.RangePicker
+                  showTime
+                  value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : undefined}
+                  onChange={(dates) => {
+                    if (dates) {
+                      setDateRange([dates[0]!.format('YYYY-MM-DD HH:mm:ss'), dates[1]!.format('YYYY-MM-DD HH:mm:ss')])
+                    } else {
+                      setDateRange([])
+                    }
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item></Col>
+              <Col span={8}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['system:operlog:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
             <HasPermi permissions={['system:operlog:remove']}><Button type="default" danger icon={<ClearOutlined />} onClick={handleClean}>{t('clean')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/operlog/export" exportParams={queryParams} exportFilename="操作日志.xlsx" />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="operId" columns={columns} dataSource={dataList} loading={loading} pagination={false} scroll={{ x: 1200 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>

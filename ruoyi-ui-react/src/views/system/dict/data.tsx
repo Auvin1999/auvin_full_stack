@@ -106,7 +106,7 @@ export default function DictDataIndex() {
         <Table rowKey="dictCode" columns={columns} dataSource={dataList} loading={loading} pagination={false} scroll={{ x: 800 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>
-      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={500} destroyOnClose>
+      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={500} destroyOnHidden>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="dictCode" hidden><Input /></Form.Item>
           <Form.Item name="dictType" hidden><Input /></Form.Item>

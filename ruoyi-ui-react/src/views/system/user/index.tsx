@@ -3,6 +3,7 @@ import {
   Table, Button, Form, Input, Select, Switch, Modal, Space, Row, Col,
   message, Card, DatePicker, TreeSelect, InputNumber
 } from 'antd'
+import dayjs from 'dayjs'
 import {
   PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined,
   ReloadOutlined, KeyOutlined
@@ -14,7 +15,7 @@ import { HasPermi } from '@/components/Permission'
 import Pagination from '@/components/Pagination'
 import RightToolbar from '@/components/RightToolbar'
 import { useDict } from '@/utils/dict'
-import { parseTime } from '@/utils/ruoyi'
+import { parseTime, addDateRange } from '@/utils/ruoyi'
 
 const { RangePicker } = DatePicker
 
@@ -58,6 +59,7 @@ export default function UserIndex() {
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([])
   const [showSearch, setShowSearch] = useState(true)
+  const [dateRange, setDateRange] = useState<string[]>([])
 
   // 查询参数
   const [queryParams, setQueryParams] = useState<QueryParams>({
@@ -74,7 +76,7 @@ export default function UserIndex() {
   const getList = useCallback(async () => {
     setLoading(true)
     try {
-      const res: any = await listUser(queryParams)
+      const res: any = await listUser(addDateRange(queryParams, dateRange))
       setUserList(res.rows || [])
       setTotal(res.total || 0)
     } catch {
@@ -82,7 +84,7 @@ export default function UserIndex() {
     } finally {
       setLoading(false)
     }
-  }, [queryParams])
+  }, [queryParams, dateRange])
 
   useEffect(() => {
     getList()
@@ -96,6 +98,7 @@ export default function UserIndex() {
 
   /** 重置 */
   const resetQuery = () => {
+    setDateRange([])
     queryForm.resetFields()
     setQueryParams({ pageNum: 1, pageSize: 10 })
   }
@@ -247,53 +250,70 @@ export default function UserIndex() {
 
   return (
     <div className="app-container">
-      {/* 搜索区域 */}
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="userName" label={t('user.userName')}>
-              <Input placeholder={t('user.userName')} allowClear />
-            </Form.Item>
-            <Form.Item name="phone" label={t('user.phone')}>
-              <Input placeholder={t('user.phone')} allowClear />
-            </Form.Item>
-            <Form.Item name="status" label={t('status')}>
-              <Select placeholder={t('status')} allowClear style={{ width: 150 }}>
-                {(dict.sys_normal_disable || []).map((item) => (
-                  <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-            <Form.Item>
-              <Space>
-                <Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button>
-                <Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        </Card>
-      )}
-
-      {/* 工具栏 */}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+      {/* 搜索 + 操作栏 */}
+      <Card style={{ marginBottom: 16 }}>
+        <Form form={queryForm} onFinish={handleQuery}>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item name="userName" label={t('user.userName')}>
+                <Input placeholder={t('user.userName')} allowClear />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="phone" label={t('user.phone')}>
+                <Input placeholder={t('user.phone')} allowClear />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item name="status" label={t('status')}>
+                <Select placeholder={t('status')} allowClear style={{ width: '100%' }}>
+                  {(dict.sys_normal_disable || []).map((item) => (
+                    <Select.Option key={item.value} value={item.value}>{item.label}</Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item label={t('createTime')}>
+                <DatePicker.RangePicker
+                  value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : undefined}
+                  onChange={(dates) => {
+                    if (dates) {
+                      setDateRange([dates[0]!.format('YYYY-MM-DD'), dates[1]!.format('YYYY-MM-DD')])
+                    } else {
+                      setDateRange([])
+                    }
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={16}>
+              <Form.Item>
+                <Space>
+                  <Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button>
+                  <Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button>
+                </Space>
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+        {/* 操作按钮行 */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['system:user:add']}>
               <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button>
             </HasPermi>
             <HasPermi permissions={['system:user:edit']}>
-              <Button
-                type="default"
-                icon={<EditOutlined />}
-                disabled={selectedRowKeys.length !== 1}
-                onClick={() => {
-                  const record = userList.find((u) => u.userId === selectedRowKeys[0])
-                  if (record) handleUpdate(record)
-                }}
-              >{t('edit')}</Button>
+              <Button icon={<EditOutlined />} disabled={selectedRowKeys.length !== 1} onClick={() => {
+                const record = userList.find((u) => u.userId === selectedRowKeys[0])
+                if (record) handleUpdate(record)
+              }}>{t('edit')}</Button>
             </HasPermi>
             <HasPermi permissions={['system:user:remove']}>
-              <Button type="default" danger icon={<DeleteOutlined />} disabled={selectedRowKeys.length === 0} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button>
+              <Button danger icon={<DeleteOutlined />} disabled={selectedRowKeys.length === 0} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button>
             </HasPermi>
           </Space>
           <RightToolbar
@@ -305,8 +325,10 @@ export default function UserIndex() {
             exportFilename="用户数据.xlsx"
           />
         </div>
+      </Card>
 
-        {/* 数据表格 */}
+      {/* 数据表格 */}
+      <Card>
         <Table
           rowKey="userId"
           columns={columns}
@@ -319,8 +341,6 @@ export default function UserIndex() {
             onChange: (keys) => setSelectedRowKeys(keys as number[])
           }}
         />
-
-        {/* 分页 */}
         <Pagination
           total={total}
           page={queryParams.pageNum}
@@ -337,7 +357,7 @@ export default function UserIndex() {
         onCancel={() => setOpen(false)}
         confirmLoading={submitting}
         width={600}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="userId" hidden>

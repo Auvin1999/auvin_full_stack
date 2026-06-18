@@ -336,6 +336,7 @@ body {
   position: relative;
   overflow: auto;
   padding: 16px;
+  padding-top: 100px;
 }
 
 /* ============================================
@@ -343,6 +344,15 @@ body {
    ============================================ */
 .app-container {
   padding: 0;
+}
+
+/* 搜索表单行自动换行 */
+.app-container .ant-row {
+  flex-wrap: wrap;
+}
+
+.app-container .ant-row .ant-col {
+  min-width: 0;
 }
 
 .search-form {

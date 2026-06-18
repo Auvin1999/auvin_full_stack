@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Space, Card, message } from 'antd'
+import { Table, Button, Form, Input, Select, Space, Card, message, Row, Col } from 'antd'
 import { DeleteOutlined, SearchOutlined, ReloadOutlined, ClearOutlined } from '@ant-design/icons'
 import { listJobLog, delJobLog, cleanJobLog } from '@/api/monitor/jobLog'
 import { HasPermi } from '@/components/Permission'
@@ -59,28 +59,32 @@ export default function JobLogIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="jobName" label={t('job.jobName')}><Input placeholder={t('job.jobName')} allowClear /></Form.Item>
-            <Form.Item name="jobGroup" label={t('job.jobGroup')}>
-              <Select placeholder={t('job.jobGroup')} allowClear style={{ width: 120 }}>{(dict.sys_job_group || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item name="status" label={t('jobLog.execStatus')}>
-              <Select placeholder={t('jobLog.execStatus')} allowClear style={{ width: 120 }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="jobName" label={t('job.jobName')}><Input placeholder={t('job.jobName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="jobGroup" label={t('job.jobGroup')}>
+                <Select placeholder={t('job.jobGroup')} allowClear style={{ width: '100%' }}>{(dict.sys_job_group || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+              <Col span={8}><Form.Item name="status" label={t('jobLog.execStatus')}>
+                <Select placeholder={t('jobLog.execStatus')} allowClear style={{ width: '100%' }}>{(dict.sys_common_status || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['monitor:job:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
             <HasPermi permissions={['monitor:job:remove']}><Button type="default" danger icon={<ClearOutlined />} onClick={handleClean}>{t('clean')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/schedule/job/log/export" exportParams={queryParams} exportFilename="调度日志.xlsx" />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="jobLogId" columns={columns} dataSource={dataList} loading={loading} pagination={false} scroll={{ x: 1100 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>

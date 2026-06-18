@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message, Row, Col } from 'antd'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { confirmDelete } from '@/utils/confirm'
@@ -73,32 +73,36 @@ export default function PostIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="postCode" label={t('postMgmt.postCode')}><Input placeholder={t('postMgmt.postCode')} allowClear /></Form.Item>
-            <Form.Item name="postName" label={t('postMgmt.postName')}><Input placeholder={t('postMgmt.postName')} allowClear /></Form.Item>
-            <Form.Item name="status" label={t('status')}>
-              <Select placeholder={t('status')} allowClear style={{ width: 150 }}>
-                {(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}
-              </Select>
-            </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="postCode" label={t('postMgmt.postCode')}><Input placeholder={t('postMgmt.postCode')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="postName" label={t('postMgmt.postName')}><Input placeholder={t('postMgmt.postName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="status" label={t('status')}>
+                <Select placeholder={t('status')} allowClear style={{ width: '100%' }}>
+                  {(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}
+                </Select>
+              </Form.Item></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={24}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['system:post:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
             <HasPermi permissions={['system:post:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/post/export" exportParams={queryParams} exportFilename="岗位数据.xlsx" />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="postId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 900 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>
-      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={500} destroyOnClose>
+      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={500} destroyOnHidden>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="postId" hidden><Input /></Form.Item>
           <Form.Item name="postName" label={t('postMgmt.postName')} rules={[{ required: true, message: t('postMgmt.postName') }]}><Input placeholder={t('postMgmt.postName')} /></Form.Item>

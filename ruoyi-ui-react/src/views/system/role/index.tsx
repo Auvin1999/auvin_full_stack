@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message, Tree } from 'antd'
+import { Table, Button, Form, Input, Select, Radio, InputNumber, Modal, Space, Card, message, Tree, DatePicker, Row, Col } from 'antd'
+import dayjs from 'dayjs'
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import { confirmDelete } from '@/utils/confirm'
@@ -10,7 +11,7 @@ import Pagination from '@/components/Pagination'
 import RightToolbar from '@/components/RightToolbar'
 import DictTag from '@/components/DictTag'
 import { useDict } from '@/utils/dict'
-import { parseTime } from '@/utils/ruoyi'
+import { parseTime, addDateRange } from '@/utils/ruoyi'
 
 export default function RoleIndex() {
   const { t } = useTranslation()
@@ -31,16 +32,17 @@ export default function RoleIndex() {
   const [menuCheckedKeys, setMenuCheckedKeys] = useState<number[]>([])
   const [menuOpen, setMenuOpen] = useState(false)
   const [currentRoleId, setCurrentRoleId] = useState<number | null>(null)
+  const [dateRange, setDateRange] = useState<string[]>([])
 
   const getList = useCallback(async () => {
     setLoading(true)
-    try { const res: any = await listRole(queryParams); setList(res.rows || []); setTotal(res.total || 0) } finally { setLoading(false) }
-  }, [queryParams])
+    try { const res: any = await listRole(addDateRange(queryParams, dateRange)); setList(res.rows || []); setTotal(res.total || 0) } finally { setLoading(false) }
+  }, [queryParams, dateRange])
 
   useEffect(() => { getList() }, [getList])
 
   const handleQuery = () => { setQueryParams((p: any) => ({ ...p, ...queryForm.getFieldsValue(), pageNum: 1 })) }
-  const resetQuery = () => { queryForm.resetFields(); setQueryParams({ pageNum: 1, pageSize: 10 }) }
+  const resetQuery = () => { setDateRange([]); queryForm.resetFields(); setQueryParams({ pageNum: 1, pageSize: 10 }) }
   const handlePagination = (page: number, pageSize: number) => { setQueryParams((p: any) => ({ ...p, pageNum: page, pageSize })) }
   const handleAdd = () => { form.resetFields(); setTitle(t('role.addRole')); setOpen(true) }
   const handleUpdate = async (row: any) => {
@@ -89,31 +91,48 @@ export default function RoleIndex() {
 
   return (
     <div className="app-container">
-      {showSearch && (
-        <Card style={{ marginBottom: 16 }}>
-          <Form form={queryForm} layout="inline" onFinish={handleQuery}>
-            <Form.Item name="roleName" label={t('role.roleName')}><Input placeholder={t('role.roleName')} allowClear /></Form.Item>
-            <Form.Item name="roleKey" label={t('role.roleKey')}><Input placeholder={t('role.roleKey')} allowClear /></Form.Item>
-            <Form.Item name="status" label={t('status')}>
-              <Select placeholder={t('status')} allowClear style={{ width: 120 }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
-            </Form.Item>
-            <Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item>
+      <Card style={{ marginBottom: showSearch ? 16 : 0 }}>
+        <div style={{ height: showSearch ? 'auto' : 0, overflow: 'hidden' }}>
+          <Form form={queryForm} onFinish={handleQuery}>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item name="roleName" label={t('role.roleName')}><Input placeholder={t('role.roleName')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="roleKey" label={t('role.roleKey')}><Input placeholder={t('role.roleKey')} allowClear /></Form.Item></Col>
+              <Col span={8}><Form.Item name="status" label={t('status')}>
+                <Select placeholder={t('status')} allowClear style={{ width: '100%' }}>{(dict.sys_normal_disable || []).map((i: any) => <Select.Option key={i.value} value={i.value}>{i.label}</Select.Option>)}</Select>
+              </Form.Item></Col>
+            </Row>
+            <Row gutter={16}>
+              <Col span={8}><Form.Item label={t('createTime')}>
+                <DatePicker.RangePicker
+                  value={dateRange.length === 2 ? [dayjs(dateRange[0]), dayjs(dateRange[1])] : undefined}
+                  onChange={(dates) => {
+                    if (dates) {
+                      setDateRange([dates[0]!.format('YYYY-MM-DD'), dates[1]!.format('YYYY-MM-DD')])
+                    } else {
+                      setDateRange([])
+                    }
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </Form.Item></Col>
+              <Col span={16}><Form.Item><Space><Button type="primary" icon={<SearchOutlined />} htmlType="submit">{t('search')}</Button><Button icon={<ReloadOutlined />} onClick={resetQuery}>{t('reset')}</Button></Space></Form.Item></Col>
+            </Row>
           </Form>
-        </Card>
-      )}
-      <Card>
-        <div style={{ display: 'flex', marginBottom: 16 }}>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
           <Space>
             <HasPermi permissions={['system:role:add']}><Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>{t('add')}</Button></HasPermi>
             <HasPermi permissions={['system:role:remove']}><Button type="default" danger icon={<DeleteOutlined />} disabled={!selectedRowKeys.length} onClick={() => { if (selectedRowKeys.length) confirmDelete({ onOk: () => handleDelete() }) }}>{t('delete')}</Button></HasPermi>
           </Space>
           <RightToolbar showSearch={showSearch} onToggleSearch={() => setShowSearch(!showSearch)} onRefresh={getList} exportUrl="/system/role/export" exportParams={queryParams} exportFilename="角色数据.xlsx" />
         </div>
+      </Card>
+      <Card>
         <Table rowKey="roleId" columns={columns} dataSource={list} loading={loading} pagination={false} scroll={{ x: 1000 }} rowSelection={{ selectedRowKeys, onChange: (k) => setSelectedRowKeys(k as number[]) }} />
         <Pagination total={total} page={queryParams.pageNum} limit={queryParams.pageSize} onChange={handlePagination} />
       </Card>
       {/* 新增/编辑弹窗 */}
-      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={550} destroyOnClose>
+      <Modal title={title} open={open} onOk={handleSubmit} onCancel={() => setOpen(false)} confirmLoading={submitting} width={550} destroyOnHidden>
         <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
           <Form.Item name="roleId" hidden><Input /></Form.Item>
           <Form.Item name="roleName" label={t('role.roleName')} rules={[{ required: true, message: t('role.roleName') }]}><Input placeholder={t('role.roleName')} /></Form.Item>
