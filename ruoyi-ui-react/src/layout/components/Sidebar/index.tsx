@@ -24,6 +24,7 @@ import {
 } from '@ant-design/icons'
 import { usePermissionStore, type AppRouteObject } from '@/store/usePermissionStore'
 import { useAppStore } from '@/store/useAppStore'
+import { useSettingsStore } from '@/store/useSettingsStore'
 import { isExternal } from '@/utils/validate'
 import Logo from './Logo'
 
@@ -136,6 +137,7 @@ export default function Sidebar() {
   const navigate = useNavigate()
   const { sidebarRouters } = usePermissionStore()
   const { sidebar } = useAppStore()
+  const { isDark } = useSettingsStore()
 
   const menuItems = useMemo(() => buildMenuItems(sidebarRouters), [sidebarRouters])
 
@@ -165,10 +167,10 @@ export default function Sidebar() {
   if (sidebar.hide) return null
 
   return (
-    <div className="sidebar-container">
+    <div className="sidebar-container" style={isDark ? undefined : { backgroundColor: '#fff' }}>
       <Logo />
       <Menu
-        theme="dark"
+        theme={isDark ? 'dark' : 'light'}
         mode="inline"
         selectedKeys={selectedKeys}
         defaultOpenKeys={openKeys}

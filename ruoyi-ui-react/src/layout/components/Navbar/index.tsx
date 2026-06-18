@@ -1,7 +1,9 @@
 import { useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Breadcrumb, Dropdown, Avatar, Space, Tooltip, Badge } from 'antd'
+import { Breadcrumb, Dropdown, Avatar, Space, Tooltip } from 'antd'
 import type { MenuProps } from 'antd'
+import { useTranslation } from 'react-i18next'
+import i18n from '@/i18n'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -11,6 +13,7 @@ import {
   CompressOutlined,
   BulbOutlined,
   BulbFilled,
+  GlobalOutlined,
 } from '@ant-design/icons'
 import { useAppStore } from '@/store/useAppStore'
 import { useUserStore } from '@/store/useUserStore'
@@ -18,15 +21,15 @@ import { useSettingsStore } from '@/store/useSettingsStore'
 import { useState, useEffect } from 'react'
 
 export default function Navbar() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { sidebar, toggleSideBar } = useAppStore()
   const { name, nickName, avatar, logOut } = useUserStore()
-  const { isDark, toggleTheme } = useSettingsStore()
+  const { isDark, toggleTheme, language } = useSettingsStore()
 
   const [isFullscreen, setIsFullscreen] = useState(false)
 
-  // 全屏切换
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen()
@@ -48,40 +51,32 @@ export default function Navbar() {
     navigate('/login')
   }
 
-  // 动态面包屑
-  const breadcrumbItems = [{ title: <a onClick={() => navigate('/')}>首页</a> }]
+  const handleLanguageChange = () => {
+    const next = language === 'zh-CN' ? 'en-US' : 'zh-CN'
+    useSettingsStore.getState().changeSetting({ key: 'language', value: next })
+    i18n.changeLanguage(next)
+  }
+
+  // 动态面包屑（用 i18n key）
+  const breadcrumbItems = [{ title: <a onClick={() => navigate('/')}>{t('navbar.home')}</a> }]
   const pathParts = location.pathname.split('/').filter(Boolean)
   const nameMap: Record<string, string> = {
-    system: '系统管理', user: '用户管理', role: '角色管理', menu: '菜单管理',
-    dept: '部门管理', dict: '字典管理', config: '参数设置', notice: '通知公告',
-    post: '岗位管理', operlog: '操作日志', logininfor: '登录日志',
-    monitor: '系统监控', job: '定时任务', online: '在线用户',
-    tool: '系统工具', gen: '代码生成', build: '表单构建',
-    'dict-data': '字典数据', profile: '个人中心',
+    system: t('menu.system'), user: t('menu.user'), role: t('menu.role'), menu: t('menu.menu'),
+    dept: t('menu.dept'), dict: t('menu.dict'), config: t('menu.config'), notice: t('menu.notice'),
+    post: t('menu.post'), operlog: t('menu.operlog'), logininfor: t('menu.logininfor'),
+    monitor: t('menu.monitor'), job: t('menu.job'), online: t('menu.online'),
+    tool: t('menu.tool'), gen: t('menu.gen'), build: t('menu.build'),
+    'dict-data': t('menu.dictData'), profile: t('menu.profile'),
   }
   pathParts.forEach((part, index) => {
     const title = nameMap[part] || part
-    if (index < pathParts.length - 1) {
-      breadcrumbItems.push({ title: <span>{title}</span> })
-    } else {
-      breadcrumbItems.push({ title: <span style={{ color: '#333' }}>{title}</span> })
-    }
+    breadcrumbItems.push({ title: <span>{title}</span> })
   })
 
   const dropdownItems: MenuProps['items'] = [
-    {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: '个人中心',
-      onClick: () => navigate('/user/profile'),
-    },
+    { key: 'profile', icon: <UserOutlined />, label: t('navbar.profile'), onClick: () => navigate('/user/profile') },
     { type: 'divider' },
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: '退出登录',
-      onClick: handleLogout,
-    },
+    { key: 'logout', icon: <LogoutOutlined />, label: t('navbar.logout'), onClick: handleLogout },
   ]
 
   return (
@@ -95,15 +90,22 @@ export default function Navbar() {
       </div>
 
       <div className="right-menu">
-        <Tooltip title="全屏">
+        <Tooltip title={isFullscreen ? t('navbar.exitFullscreen') : t('navbar.fullscreen')}>
           <div className="right-menu-item" onClick={toggleFullscreen}>
             {isFullscreen ? <CompressOutlined /> : <ExpandOutlined />}
           </div>
         </Tooltip>
 
-        <Tooltip title={isDark ? '浅色模式' : '深色模式'}>
+        <Tooltip title={isDark ? t('navbar.lightMode') : t('navbar.darkMode')}>
           <div className="right-menu-item" onClick={toggleTheme}>
             {isDark ? <BulbFilled style={{ color: '#faad14' }} /> : <BulbOutlined />}
+          </div>
+        </Tooltip>
+
+        <Tooltip title={t('navbar.switchLang')}>
+          <div className="right-menu-item" onClick={handleLanguageChange}>
+            <GlobalOutlined />
+            <span style={{ fontSize: 12, marginLeft: 4 }}>{language === 'zh-CN' ? '中' : 'EN'}</span>
           </div>
         </Tooltip>
 

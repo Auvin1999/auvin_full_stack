@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Dropdown } from 'antd'
-import type { MenuProps } from 'antd'
+import { useTranslation } from 'react-i18next'
 import {
   CloseOutlined,
   ReloadOutlined,
@@ -13,6 +12,7 @@ import {
 import { useTagsViewStore, type TagView } from '@/store/useTagsViewStore'
 
 export default function TagsView() {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -189,28 +189,28 @@ export default function TagsView() {
           onClick={(e) => e.stopPropagation()}
         >
           <div className="context-menu-item" onClick={handleRefreshPage}>
-            <ReloadOutlined /> 刷新页面
+            <ReloadOutlined /> {t('tagsView.refreshPage')}
           </div>
           {!isAffix && (
             <div className="context-menu-item" onClick={handleCloseCurrent}>
-              <CloseOutlined /> 关闭当前
+              <CloseOutlined /> {t('tagsView.closeCurrent')}
             </div>
           )}
           <div className="context-menu-item" onClick={handleCloseOthers}>
-            <CloseCircleOutlined /> 关闭其他
+            <CloseCircleOutlined /> {t('tagsView.closeOthers')}
           </div>
           {!isFirstView && (
             <div className="context-menu-item" onClick={handleCloseLeft}>
-              <ArrowLeftOutlined /> 关闭左侧
+              <ArrowLeftOutlined /> {t('tagsView.closeLeft')}
             </div>
           )}
           {!isLastView && (
             <div className="context-menu-item" onClick={handleCloseRight}>
-              <ArrowRightOutlined /> 关闭右侧
+              <ArrowRightOutlined /> {t('tagsView.closeRight')}
             </div>
           )}
           <div className="context-menu-item" onClick={handleCloseAll}>
-            <MinusCircleOutlined /> 全部关闭
+            <MinusCircleOutlined /> {t('tagsView.closeAll')}
           </div>
         </div>
       )}

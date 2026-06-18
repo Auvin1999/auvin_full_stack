@@ -65,15 +65,14 @@ export const useUserStore = create<UserState & UserActions>((set) => ({
   },
 
   async login(userInfo) {
-    // 延迟导入避免循环依赖
     const { login } = await import('@/api/login')
     const res = await login(userInfo.username, userInfo.password, userInfo.code, userInfo.uuid)
     const data = res as any
-    // 设置 token 过期时间
-    const expiresIn = data.expires_in
-    Cookies.set('Admin-Expires-In', expiresIn)
-    set({ token: data.access_token })
-    Cookies.set(TokenKey, data.access_token)
+    const token = data.access_token || data.token || data.data?.access_token || data.data?.token
+    const expiresIn = data.expires_in || data.data?.expires_in
+    Cookies.set('Admin-Expires-In', String(expiresIn || ''))
+    set({ token })
+    Cookies.set(TokenKey, token)
     return data
   },
 
@@ -81,16 +80,20 @@ export const useUserStore = create<UserState & UserActions>((set) => ({
     const { getInfo } = await import('@/api/login')
     const res = await getInfo()
     const data = res as any
-    const user = data.user
-    const roles = data.roles && data.roles.length > 0 ? data.roles : ['ROLE_DEFAULT']
+    // 兼容不同后端返回格式
+    const user = data.user || data.data?.user || data
+    const roles = (data.roles || data.data?.roles || []).length > 0
+      ? (data.roles || data.data?.roles)
+      : ['ROLE_DEFAULT']
+    const permissions = data.permissions || data.data?.permissions || []
 
     set({
-      id: user.userId,
-      name: user.userName,
+      id: user.userId || user.id,
+      name: user.userName || user.username,
       nickName: user.nickName,
       avatar: user.avatar,
       roles,
-      permissions: data.permissions || []
+      permissions,
     })
     return data
   },

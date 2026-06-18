@@ -13,6 +13,7 @@ interface SettingsState {
   footerVisible: boolean
   footerContent: string
   isDark: boolean
+  language: 'zh-CN' | 'en-US'
 }
 
 interface SettingsActions {
@@ -46,6 +47,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>((set, ge
   footerVisible: stored.footerVisible ?? true,
   footerContent: 'Copyright © 2019 若依管理系统 All Rights Reserved.',
   isDark: stored.isDark ?? false,
+  language: (stored.language as 'zh-CN' | 'en-US') || 'zh-CN',
 
   changeSetting(payload: { key: string; value: any }) {
     const { key, value } = payload
@@ -63,7 +65,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>((set, ge
         sidebarLogo: state.sidebarLogo,
         dynamicTitle: state.dynamicTitle,
         footerVisible: state.footerVisible,
-        isDark: state.isDark
+        isDark: state.isDark,
+        language: state.language
       }
       toStore[key] = value
       localStorage.setItem('layout-setting', JSON.stringify(toStore))

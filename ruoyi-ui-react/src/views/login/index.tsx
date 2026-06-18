@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Form, Input, Button, Checkbox, message } from 'antd'
 import { UserOutlined, LockOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
+import { useTranslation } from 'react-i18next'
 import Cookies from 'js-cookie'
 import { getCodeImg } from '@/api/login'
 import { useUserStore } from '@/store/useUserStore'
@@ -17,6 +18,7 @@ interface LoginForm {
 }
 
 export default function Login() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { login } = useUserStore()
@@ -86,7 +88,7 @@ export default function Login() {
       const redirect = searchParams.get('redirect') || '/'
       navigate(redirect, { replace: true })
     } catch (e: any) {
-      message.error(e?.message || '登录失败')
+      message.error(e?.message || t('login.loginFailed'))
       if (captchaEnabled) {
         getCode()
       }
@@ -100,59 +102,37 @@ export default function Login() {
       <Form form={form} className="login-form" onFinish={handleLogin}>
         <h3 className="title">{import.meta.env.VITE_APP_TITLE}</h3>
 
-        <Form.Item name="username" rules={[{ required: true, message: '请输入您的账号' }]}>
-          <Input
-            prefix={<UserOutlined />}
-            placeholder="账号"
-            size="large"
-          />
+        <Form.Item name="username" rules={[{ required: true, message: t('login.usernameRequired') }]}>
+          <Input prefix={<UserOutlined />} placeholder={t('login.username')} size="large" />
         </Form.Item>
 
-        <Form.Item name="password" rules={[{ required: true, message: '请输入您的密码' }]}>
-          <Input.Password
-            prefix={<LockOutlined />}
-            placeholder="密码"
-            size="large"
-            onPressEnter={handleLogin}
-          />
+        <Form.Item name="password" rules={[{ required: true, message: t('login.passwordRequired') }]}>
+          <Input.Password prefix={<LockOutlined />} placeholder={t('login.password')} size="large" onPressEnter={handleLogin} />
         </Form.Item>
 
         {captchaEnabled && (
           <>
-            <Form.Item name="uuid" hidden>
-              <Input />
-            </Form.Item>
-            <Form.Item name="code" rules={[{ required: true, message: '请输入验证码' }]}>
+            <Form.Item name="uuid" hidden><Input /></Form.Item>
+            <Form.Item name="code" rules={[{ required: true, message: t('login.captchaRequired') }]}>
               <div style={{ display: 'flex', gap: 12 }}>
-                <Input
-                  prefix={<SafetyCertificateOutlined />}
-                  placeholder="验证码"
-                  size="large"
-                  style={{ flex: 1 }}
-                  onPressEnter={handleLogin}
-                />
-                <img
-                  src={codeUrl}
-                  alt="验证码"
-                  onClick={getCode}
-                  style={{ height: 40, cursor: 'pointer', borderRadius: 4 }}
-                />
+                <Input prefix={<SafetyCertificateOutlined />} placeholder={t('login.captcha')} size="large" style={{ flex: 1 }} onPressEnter={handleLogin} />
+                <img src={codeUrl} alt="captcha" onClick={getCode} style={{ height: 40, cursor: 'pointer', borderRadius: 4 }} />
               </div>
             </Form.Item>
           </>
         )}
 
         <Form.Item name="rememberMe" valuePropName="checked">
-          <Checkbox>记住密码</Checkbox>
+          <Checkbox>{t('login.rememberMe')}</Checkbox>
         </Form.Item>
 
         <Form.Item>
           <Button type="primary" htmlType="submit" size="large" block loading={loading}>
-            {loading ? '登 录 中...' : '登 录'}
+            {loading ? t('login.loggingIn') : t('login.loginBtn')}
           </Button>
           {registerEnabled && (
             <div style={{ textAlign: 'right', marginTop: 8 }}>
-              <a href="/register">立即注册</a>
+              <a href="/register">{t('login.register')}</a>
             </div>
           )}
         </Form.Item>
