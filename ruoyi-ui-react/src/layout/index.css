@@ -1,0 +1,237 @@
+/* 主布局容器 */
+.app-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+}
+
+.app-wrapper.mobile .sidebar-container {
+  transition: transform 0.28s;
+  width: 210px !important;
+}
+
+.app-wrapper.hideSidebar .sidebar-container {
+  width: 54px !important;
+}
+
+.app-wrapper.closeSidebar .sidebar-container {
+  transform: translateX(-210px);
+}
+
+.app-wrapper.mobile.closeSidebar .sidebar-container {
+  transform: translateX(0);
+}
+
+/* 遮罩层 */
+.drawer-bg {
+  background: #000;
+  opacity: 0.3;
+  width: 100%;
+  top: 0;
+  height: 100%;
+  position: absolute;
+  z-index: 999;
+}
+
+/* 主内容区 */
+.main-container {
+  min-height: 100%;
+  transition: margin-left 0.28s;
+  margin-left: 210px;
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.app-wrapper.closeSidebar .main-container {
+  margin-left: 54px;
+}
+
+.app-wrapper.hideSidebar .main-container {
+  margin-left: 0;
+}
+
+/* 固定头部 */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9;
+  transition: width 0.28s;
+  width: calc(100% - 210px);
+}
+
+.fixed-header-collapsed {
+  width: calc(100% - 54px);
+}
+
+.app-wrapper.hideSidebar .fixed-header {
+  width: 100%;
+}
+
+/* 侧边栏容器 */
+.sidebar-container {
+  width: 210px;
+  min-height: 100%;
+  transition: width 0.28s;
+  overflow: hidden;
+  background-color: #304156;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1001;
+}
+
+/* AppMain */
+.app-main {
+  min-height: calc(100vh - 84px);
+  width: 100%;
+  position: relative;
+  overflow: auto;
+  padding: 16px;
+}
+
+.fixed-header + .app-main {
+  padding-top: 84px;
+}
+
+/* TagsView */
+.tags-view-container {
+  height: 34px;
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #d8dce5;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
+}
+
+.tags-view-wrapper {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 8px;
+}
+
+.tags-view-item {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 8px;
+  margin: 0 2px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid #d8dce5;
+  color: #495060;
+  background: #fff;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.tags-view-item.active {
+  background-color: #409eff;
+  color: #fff;
+  border-color: #409eff;
+}
+
+.tags-view-item .anticon-close {
+  margin-left: 4px;
+  font-size: 12px;
+}
+
+/* Navbar */
+.navbar {
+  height: 50px;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.navbar .hamburger-container {
+  line-height: 46px;
+  height: 100%;
+  cursor: pointer;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+.navbar .hamburger-container:hover {
+  background: rgba(0, 0, 0, 0.025);
+}
+
+.navbar .breadcrumb-container {
+  margin-left: 8px;
+}
+
+.navbar .right-menu {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.navbar .right-menu-item {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 8px;
+  cursor: pointer;
+  color: #5a5e66;
+}
+
+.navbar .right-menu-item:hover {
+  background: rgba(0, 0, 0, 0.025);
+}
+
+/* Sidebar Menu */
+.sidebar-logo-container {
+  position: relative;
+  width: 100%;
+  height: 50px;
+  line-height: 50px;
+  background: #2b2f3a;
+  text-align: center;
+  overflow: hidden;
+}
+
+.sidebar-logo-container .sidebar-logo {
+  width: 32px;
+  height: 32px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.sidebar-logo-container .sidebar-title {
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+/* 统一样式 */
+.app-container {
+  padding: 20px;
+}
+
+.search-form {
+  margin-bottom: 16px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pagination-wrapper {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
